@@ -11,20 +11,19 @@ import { authenticate } from "./middlewares/authenticate.js";
 import { authorize } from "./middlewares/role.js";
 const app = express();
 
-// Middleware
 app.use(express.urlencoded({ extended: false }));
 app.use(express.json());
 app.use(cookieParser());
 
 app.use("/auth", authRouter);
 app.use(authenticate);
-app.use("/scoring", scoringRouter);
-app.use("/candidates", candidateRouter);
-app.use("/recruiters", recruiterRouter);
-app.use("/interview-templates", interviewTemplateRouter);
+app.use("/scoring", authorize("recruiter", "admin"), scoringRouter);
+app.use("/candidates", authorize("candidate"), candidateRouter);
+app.use("/recruiters", authorize("recruiter", "admin"), recruiterRouter);
+app.use("/interview-templates", authorize("recruiter", "admin"), interviewTemplateRouter);
 app.use("/questions", authorize("recruiter", "admin"), questionsRouter);
 app.use("/submit", authorize("candidate"), submissionsRouter);
-// Sample route
+
 app.get("/", (req, res) => {
   res.send("API is running...");
 });
