@@ -24,7 +24,7 @@ const AuthContext = createContext<AuthContextValue | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
 	const [user, setUser] = useState<User | null>(null);
-	const [loading, setLoading] = useState<boolean>(false);
+	const [loading, setLoading] = useState<boolean>(true);
 	const [error, setError] = useState<string | null>(null);
 
 	const persistUser = useCallback((nextUser: User | null) => {
@@ -40,12 +40,24 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 		setLoading(true);
 		setError(null);
 		try {
+			const token = typeof window !== "undefined" ? localStorage.getItem("token") : null;
+			const headers: Record<string, string> = {};
+			if (token) {
+				headers.Authorization = `Bearer ${token}`;
+			}
 			const res = await fetch(`${API_BASE}/auth/me`, {
 				credentials: "include",
+				headers,
 			});
 
-			if (!res.ok) {
+			if (res.status === 401 || res.status === 403) {
 				persistUser(null);
+				return;
+			}
+
+			if (!res.ok) {
+				const message = `Refresh failed (${res.status})`;
+				setError(message);
 				return;
 			}
 
@@ -54,7 +66,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 		} catch (err) {
 			const message = err instanceof Error ? err.message : "Failed to load user";
 			setError(message);
-			persistUser(null);
 		} finally {
 			setLoading(false);
 		}
@@ -109,8 +120,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 	}, [persistUser]);
 
 	useEffect(() => {
+		const storedUser = typeof window !== "undefined" ? localStorage.getItem("user") : null;
+		if (storedUser) {
+			try {
+				persistUser(JSON.parse(storedUser) as User);
+			} catch {
+				persistUser(null);
+			}
+		}
 		refresh();
-	}, [refresh]);
+	}, [refresh, persistUser]);
 
 	return (
 		<AuthContext.Provider value={{ user, loading, error, login, logout, refresh }}>
