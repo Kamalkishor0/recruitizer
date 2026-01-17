@@ -41,6 +41,87 @@ export async function getAssignedTestsForCandidate(req, res) {
     res.json(assignedTests);
 }
 
+// Detailed list of assigned tests for a recruiter (execution tracking)
+export async function getRecruiterAssignedTests(req, res) {
+    try {
+        const recruiterId = req.user?._id;
+        if (!recruiterId) {
+            return res.status(401).json({ error: "Not authenticated" });
+        }
+
+        const allowedStatuses = ["pending", "in_progress", "completed"];
+        const requestedStatus = typeof req.query.status === "string" ? req.query.status.split(",") : [];
+        const statuses = (requestedStatus.length ? requestedStatus : ["pending", "in_progress"]).map((value) => value.trim()).filter((value) => allowedStatuses.includes(value));
+
+        if (statuses.length === 0) {
+            return res.status(400).json({ error: "Invalid status filter" });
+        }
+
+        const recruiterObjectId = new mongoose.Types.ObjectId(recruiterId);
+
+        const assignments = await AssignedTest.aggregate([
+            {
+                $lookup: {
+                    from: "interviewtemplates",
+                    localField: "interviewTemplate",
+                    foreignField: "_id",
+                    as: "template",
+                },
+            },
+            {
+                $lookup: {
+                    from: "users",
+                    localField: "candidateId",
+                    foreignField: "_id",
+                    as: "candidate",
+                },
+            },
+            {
+                $addFields: {
+                    recruiterIdFilled: {
+                        $ifNull: ["$recruiterId", { $arrayElemAt: ["$template.recruiterId", 0] }],
+                    },
+                    templateTitle: {
+                        $ifNull: [{ $arrayElemAt: ["$template.title", 0] }, "Untitled template"],
+                    },
+                    candidateName: {
+                        $ifNull: [{ $arrayElemAt: ["$candidate.fullName", 0] }, null],
+                    },
+                    candidateEmail: {
+                        $ifNull: [{ $arrayElemAt: ["$candidate.email", 0] }, null],
+                    },
+                },
+            },
+            {
+                $match: {
+                    recruiterIdFilled: recruiterObjectId,
+                    status: { $in: statuses },
+                },
+            },
+            {
+                $project: {
+                    _id: 0,
+                    assignedId: 1,
+                    candidateId: 1,
+                    candidateName: 1,
+                    candidateEmail: 1,
+                    interviewTemplate: 1,
+                    templateTitle: 1,
+                    status: 1,
+                    startTime: 1,
+                    createdAt: 1,
+                },
+            },
+            { $sort: { createdAt: -1 } },
+        ]);
+
+        return res.json(assignments);
+    } catch (err) {
+        console.error("Failed to load recruiter assigned tests", err);
+        return res.status(500).json({ error: "Failed to load assigned tests" });
+    }
+}
+
 // Overview metrics for recruiter dashboard
 export async function getRecruiterOverview(req, res) {
     try {
