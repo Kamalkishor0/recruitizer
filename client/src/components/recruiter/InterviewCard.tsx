@@ -1,0 +1,1 @@
+// Interview card component

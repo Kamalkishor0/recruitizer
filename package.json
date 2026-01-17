@@ -1,0 +1,8 @@
+{
+  "name": "ai-interview-monorepo",
+  "private": true,
+  "workspaces": [
+    "client",
+    "server"
+  ]
+}

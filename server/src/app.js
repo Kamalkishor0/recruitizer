@@ -1,5 +1,6 @@
 import express from "express";
 import cookieParser from "cookie-parser";
+import cors from "cors";
 import authRouter from "./routes/auth.js";
 import interviewTemplateRouter from "./routes/interviewTemplate.js";
 import questionsRouter from "./routes/questions.js";
@@ -11,6 +12,12 @@ import { authenticate } from "./middlewares/authenticate.js";
 import { authorize } from "./middlewares/role.js";
 const app = express();
 
+app.use(
+  cors({
+    origin: ["http://localhost:3000", "http://localhost:3001"],
+    credentials: true,
+  })
+);
 app.use(express.urlencoded({ extended: false }));
 app.use(express.json());
 app.use(cookieParser());
