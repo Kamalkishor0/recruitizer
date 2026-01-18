@@ -5,6 +5,9 @@ import { useEffect, useMemo, useState } from "react";
 import useAuth from "@/hooks/useAuth";
 import { useRecruiterOverview } from "@/hooks/useRecruiterOverview";
 import { useRecruiterAssignedTests, type RecruiterAssignment } from "@/hooks/useRecruiterAssignedTests";
+import { useRecruiterTemplates } from "@/hooks/useRecruiterTemplates";
+import TopCandidatesSidebar from "@/components/recruiter/TopCandidatesSidebar";
+import TemplatesSidebar from "@/components/recruiter/TemplatesSidebar";
 
 type ActiveTab =
 	| "overview"
@@ -30,9 +33,11 @@ export default function RecruiterDashboard() {
 		error: completedError,
 		reload: reloadCompleted,
 	} = useRecruiterAssignedTests({
-		enabled: !!user && active === "interviews-completed",
+		enabled: !!user && (active === "interviews-completed" || active === "results-top"),
 		statuses: ["completed"],
 	});
+
+	const { templates, loading: templatesLoading, error: templatesError, reload: reloadTemplates } = useRecruiterTemplates(!!user && active === "templates");
 	const [selectedTemplate, setSelectedTemplate] = useState<string | null>(null);
 	const [selectedCompletedTemplate, setSelectedCompletedTemplate] = useState<string | null>(null);
 
@@ -573,28 +578,28 @@ export default function RecruiterDashboard() {
 					)}
 
 					{active === "results-top" && (
-						<div className="space-y-3">
-							<h1 className="text-2xl font-semibold">Results</h1>
-							<p className="text-sm text-slate-300">See your top candidates at a glance.</p>
-							<div className="rounded-2xl border border-white/10 bg-white/5 p-4">
-								<p className="text-sm text-slate-200">Add charts and leaderboards to compare candidates.</p>
-								<Link href="/recruiter/scoring" className="mt-2 inline-block text-sm font-semibold text-indigo-200 hover:text-white">
-									View scoring
-								</Link>
+						<div className="grid gap-6 lg:grid-cols-[1.2fr,0.8fr]">
+							<div className="space-y-4">
+								<div className="space-y-2">
+									<h1 className="text-2xl font-semibold">Results</h1>
+									<p className="text-sm text-slate-300">Select a completed interview to surface its top candidate scores.</p>
+								</div>
+								<div className="rounded-2xl border border-white/10 bg-white/5 p-4">
+									<p className="text-sm text-slate-200">Need deeper analytics?</p>
+									<Link href="/recruiter/scoring" className="mt-2 inline-block text-sm font-semibold text-indigo-200 hover:text-white">
+										Go to scoring workspace
+									</Link>
+								</div>
+								{completedError && <p className="text-sm text-red-400">{completedError}</p>}
 							</div>
+							<TopCandidatesSidebar assignments={completedAssignments} onReload={reloadCompleted} />
 						</div>
 					)}
 
 					{active === "templates" && (
-						<div className="space-y-3">
-							<h1 className="text-2xl font-semibold">Templates</h1>
-							<p className="text-sm text-slate-300">Create reusable interview flows.</p>
-							<div className="rounded-2xl border border-white/10 bg-white/5 p-4">
-								<p className="text-sm text-slate-200">Jump into templates to standardize evaluations.</p>
-								<Link href="/recruiter/interviews" className="mt-2 inline-block text-sm font-semibold text-indigo-200 hover:text-white">
-									Manage templates
-								</Link>
-							</div>
+						<div>
+							{templatesError && <p className="text-sm text-red-400">{templatesError}</p>}
+							<TemplatesSidebar templates={templates} loading={templatesLoading} error={templatesError} onReload={reloadTemplates} />
 						</div>
 					)}
 

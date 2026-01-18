@@ -1,6 +1,12 @@
 import { InterviewTemplate } from "../models/interviewTemplate.js";
 import { loadQuestionsForTestType, isSupportedTestType } from "./questions/index.js";
 
+const clampLimit = (value, min = 1, max = 50) => {
+  const numeric = Number(value);
+  if (!Number.isFinite(numeric)) return min;
+  return Math.min(Math.max(Math.round(numeric), min), max);
+};
+
 export async function createInterviewTemplate(req, res) {
   const { title, description, testType, timeLimit, totalMarks } = req.body ?? {};
 
@@ -55,6 +61,38 @@ export async function listInterviewTemplates(req, res) {
   } catch (error) {
     console.error("Failed to list interview templates", error);
     return res.status(500).json({ error: "Failed to load interview templates." });
+  }
+}
+
+// Recruiter-scoped listing (lightweight) for dashboard/sidebar usage
+export async function listRecruiterTemplates(req, res) {
+  try {
+    const recruiterId = req.user?._id;
+    if (!recruiterId) {
+      return res.status(401).json({ error: "Authentication required." });
+    }
+
+    // Default to a generous limit when none is provided so the dashboard can show all templates
+    const limit = req.query.limit ? clampLimit(req.query.limit, 1, 100) : 100;
+
+    const templates = await InterviewTemplate.find({ recruiterId })
+      .sort({ createdAt: -1 })
+      .limit(limit)
+      .select({
+        title: 1,
+        description: 1,
+        testType: 1,
+        totalMarks: 1,
+        timeLimit: 1,
+        createdAt: 1,
+        questions: 1,
+      })
+      .populate("questions", "prompt marks difficulty testType");
+
+    return res.json(templates);
+  } catch (error) {
+    console.error("Failed to list recruiter templates", error);
+    return res.status(500).json({ error: "Failed to load templates." });
   }
 }
 
