@@ -2,12 +2,14 @@
 
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
+import { useSearchParams } from "next/navigation";
 import useAuth from "@/hooks/useAuth";
 import { useRecruiterOverview } from "@/hooks/useRecruiterOverview";
 import { useRecruiterAssignedTests, type RecruiterAssignment } from "@/hooks/useRecruiterAssignedTests";
 import { useRecruiterTemplates } from "@/hooks/useRecruiterTemplates";
 import TopCandidatesSidebar from "@/components/recruiter/TopCandidatesSidebar";
 import TemplatesSidebar from "@/components/recruiter/TemplatesSidebar";
+import QuestionsSidebar from "@/components/recruiter/QuestionsSidebar";
 
 type ActiveTab =
 	| "overview"
@@ -22,6 +24,7 @@ type ActiveTab =
 export default function RecruiterDashboard() {
 	const { user, loading, error, refresh, logout } = useAuth();
 	const [active, setActive] = useState<ActiveTab>("overview");
+	const searchParams = useSearchParams();
 	const { stats, loading: statsLoading, error: statsError, reload: reloadStats } = useRecruiterOverview(!!user);
 	const { assignments, loading: assignmentsLoading, error: assignmentsError, reload: reloadAssignments } = useRecruiterAssignedTests({
 		enabled: !!user && active === "interviews-pending",
@@ -37,7 +40,7 @@ export default function RecruiterDashboard() {
 		statuses: ["completed"],
 	});
 
-	const { templates, loading: templatesLoading, error: templatesError, reload: reloadTemplates } = useRecruiterTemplates(!!user && active === "templates");
+	const { templates, loading: templatesLoading, error: templatesError, deletingId, reload: reloadTemplates, deleteTemplate } = useRecruiterTemplates(!!user && active === "templates");
 	const [selectedTemplate, setSelectedTemplate] = useState<string | null>(null);
 	const [selectedCompletedTemplate, setSelectedCompletedTemplate] = useState<string | null>(null);
 
@@ -66,6 +69,15 @@ export default function RecruiterDashboard() {
 	}, [completedAssignments]);
 
 	const selectedCompletedInfo = selectedCompletedTemplate ? groupedCompleted[selectedCompletedTemplate] : null;
+
+	useEffect(() => {
+		const tab = searchParams.get("tab");
+		if (!tab) return;
+		const allowedTabs: ActiveTab[] = ["overview", "interviews-pending", "interviews-completed", "results-top", "templates", "questions", "assign"];
+		if (allowedTabs.includes(tab as ActiveTab) && tab !== active) {
+			setActive(tab as ActiveTab);
+		}
+	}, [active, searchParams]);
 
 	useEffect(() => {
 		if (selectedTemplate && !groupedAssignments[selectedTemplate]) {
@@ -565,21 +577,26 @@ export default function RecruiterDashboard() {
 					)}
 
 					{active === "questions" && (
-						<div className="space-y-3">
-							<h1 className="text-2xl font-semibold">Question bank</h1>
-							<p className="text-sm text-slate-300">Curate coding, behavioral, and multiple-choice content.</p>
-							<div className="rounded-2xl border border-white/10 bg-white/5 p-4">
-								<p className="text-sm text-slate-200">Organize questions and attach them to templates.</p>
-								<Link href="/recruiter/questions" className="mt-2 inline-block text-sm font-semibold text-indigo-200 hover:text-white">
-									Manage bank
-								</Link>
-							</div>
+						<div className="grid gap-6 lg:grid-cols-[1.15fr,0.85fr]">
+							{/* <div className="space-y-4">
+								<div className="space-y-2">
+									<h1 className="text-2xl font-semibold">Question bank</h1>
+									<p className="text-sm text-slate-300">Curate coding, behavioral, and multiple-choice content.</p>
+								</div>
+								<div className="rounded-2xl border border-white/10 bg-white/5 p-4">
+									<p className="text-sm text-slate-200">Organize questions and attach them to templates.</p>
+									<Link href="/recruiter/questions" className="mt-2 inline-block text-sm font-semibold text-indigo-200 hover:text-white">
+										Manage bank
+									</Link>
+								</div>
+							</div> */}
+							<QuestionsSidebar />
 						</div>
 					)}
 
 					{active === "results-top" && (
 						<div className="grid gap-6 lg:grid-cols-[1.2fr,0.8fr]">
-							<div className="space-y-4">
+							{/* <div className="space-y-4">
 								<div className="space-y-2">
 									<h1 className="text-2xl font-semibold">Results</h1>
 									<p className="text-sm text-slate-300">Select a completed interview to surface its top candidate scores.</p>
@@ -591,7 +608,7 @@ export default function RecruiterDashboard() {
 									</Link>
 								</div>
 								{completedError && <p className="text-sm text-red-400">{completedError}</p>}
-							</div>
+							</div> */}
 							<TopCandidatesSidebar assignments={completedAssignments} onReload={reloadCompleted} />
 						</div>
 					)}
@@ -599,7 +616,14 @@ export default function RecruiterDashboard() {
 					{active === "templates" && (
 						<div>
 							{templatesError && <p className="text-sm text-red-400">{templatesError}</p>}
-							<TemplatesSidebar templates={templates} loading={templatesLoading} error={templatesError} onReload={reloadTemplates} />
+							<TemplatesSidebar
+								templates={templates}
+								loading={templatesLoading}
+								error={templatesError}
+								onReload={reloadTemplates}
+								onDelete={deleteTemplate}
+								deletingId={deletingId}
+							/>
 						</div>
 					)}
 

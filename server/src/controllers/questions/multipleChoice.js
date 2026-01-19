@@ -27,7 +27,7 @@ export async function createMultipleChoiceQuestion(req, res) {
             return res.status(401).json({ error: "Authentication required." });
         }
 
-        const { prompt, description, options, correctOption, difficulty, tags } = req.body;
+        const { prompt, description, options, correctOption, difficulty, tags, marks } = req.body;
 
         const newQuestion = await Question.create({
             testType: "multiple_choice",
@@ -37,6 +37,7 @@ export async function createMultipleChoiceQuestion(req, res) {
             correctOption,
             difficulty,
             tags,
+            marks: typeof marks === "number" && marks > 0 ? marks : 1,
             createdBy: req.user._id,
         });
 

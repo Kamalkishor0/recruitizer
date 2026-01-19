@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import type { RecruiterTemplate } from "@/hooks/useRecruiterTemplates";
 
@@ -27,11 +28,15 @@ export type TemplatesSidebarProps = {
 	loading: boolean;
 	error: string | null;
 	onReload?: () => void;
+	onDelete?: (id: string) => Promise<void>;
+	deletingId?: string | null;
 };
 
-export default function TemplatesSidebar({ templates, loading, error, onReload }: TemplatesSidebarProps) {
+export default function TemplatesSidebar({ templates, loading, error, onReload, onDelete, deletingId }: TemplatesSidebarProps) {
 	const sortedTemplates = useMemo(() => [...templates].sort((a, b) => a.title.localeCompare(b.title)), [templates]);
 	const [selectedId, setSelectedId] = useState<string | null>(null);
+	const [confirmingId, setConfirmingId] = useState<string | null>(null);
+	const [openQuestionId, setOpenQuestionId] = useState<string | null>(null);
 
 	useEffect(() => {
 		if (!sortedTemplates.length) {
@@ -46,7 +51,21 @@ export default function TemplatesSidebar({ templates, loading, error, onReload }
 	}, [sortedTemplates]);
 
 	const selected = sortedTemplates.find((tpl) => tpl.id === selectedId) || null;
-	const hasTemplates = !loading && !error && sortedTemplates.length > 0;
+	const showGrid = !loading && !error;
+
+	const handleDelete = async (id: string) => {
+		if (!onDelete) return;
+		setConfirmingId(id);
+	};
+
+	const confirmDelete = async (id: string) => {
+		if (!onDelete) return;
+		await onDelete(id);
+		if (selectedId === id) {
+			setSelectedId(null);
+		}
+		setConfirmingId(null);
+	};
 
 	return (
 		<aside className="w-full rounded-2xl border border-white/10 bg-white/5 p-6 shadow-lg shadow-indigo-500/10">
@@ -72,40 +91,75 @@ export default function TemplatesSidebar({ templates, loading, error, onReload }
 				{!loading && !error && sortedTemplates.length === 0 && <p className="text-sm text-slate-300">No templates created yet.</p>}
 			</div>
 
-			{hasTemplates && (
+			{showGrid && (
 				<>
 					<div className="mt-4 grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+						<Link
+							href="/recruiter/interviews/create?mode=template"
+							className="group flex min-h-[160px] flex-col justify-between rounded-2xl border border-dashed border-indigo-300/60 bg-indigo-500/5 p-5 text-left transition hover:border-indigo-300 hover:bg-indigo-500/10"
+						>
+							<div className="flex items-start justify-between gap-3">
+								<div className="space-y-1">
+									<p className="text-xs uppercase tracking-[0.12em] text-indigo-200">Create</p>
+									<p className="text-base font-semibold text-white">Add template</p>
+								</div>
+								<span className="flex h-10 w-10 items-center justify-center rounded-full border border-indigo-300/60 bg-indigo-500/10 text-lg font-bold text-indigo-100 transition group-hover:scale-105">+</span>
+							</div>
+							<p className="mt-2 text-xs text-slate-200">Start a new interview flow from your question bank.</p>
+						</Link>
+
 						{sortedTemplates.map((tpl) => {
 							const isActive = tpl.id === selectedId;
 							const meta = TYPE_META[tpl.testType] || TYPE_META.default;
 							const questionCount = tpl.questions?.length ?? 0;
 
 							return (
-								<button
-									type="button"
+								<div
+									role="button"
+									tabIndex={0}
 									key={tpl.id}
 									onClick={() => setSelectedId(tpl.id)}
-									className={`group w-full rounded-2xl border p-5 text-left transition ${
+									onKeyDown={(e) => {
+										if (e.key === "Enter" || e.key === " ") {
+											e.preventDefault();
+											setSelectedId(tpl.id);
+										}
+									}}
+									className={`group relative w-full overflow-hidden rounded-2xl border p-5 text-left transition focus:outline-none focus:ring-2 focus:ring-indigo-400/70 focus:ring-offset-0 ${
 										isActive
 											? "border-indigo-400/60 bg-indigo-500/10 text-white shadow-lg shadow-indigo-500/20"
 											: "border-white/10 bg-white/5 text-slate-100 hover:border-indigo-400/40 hover:bg-white/10"
 									}`}
-									aria-pressed={isActive}
 								>
-									<div className="flex items-start justify-between gap-3">
-										<div className="space-y-1">
-											<p className="text-xs uppercase tracking-[0.12em] text-indigo-200">{meta.label}</p>
-											<p className="text-base font-semibold text-white line-clamp-2">{tpl.title}</p>
+										<div className="flex items-start justify-between gap-3 pr-10">
+											<div className="space-y-1">
+												<p className="text-xs uppercase tracking-[0.12em] text-indigo-200">{meta.label}</p>
+												<p className="text-base font-semibold text-white line-clamp-2">{tpl.title}</p>
+											</div>
+											<span className={`rounded-full border px-3 py-1 text-xs font-semibold ${meta.badge}`}>{questionCount} questions</span>
 										</div>
-										<span className={`rounded-full border px-3 py-1 text-xs font-semibold ${meta.badge}`}>{questionCount} questions</span>
-									</div>
+										{onDelete && (
+											<button
+												type="button"
+												onClick={(e) => {
+													e.preventDefault();
+													e.stopPropagation();
+													handleDelete(tpl.id);
+												}}
+												disabled={deletingId === tpl.id}
+												className="absolute right-[0.1rem] top-[0.1rem] px-2 py-1 text-[11px] font-semibold text-red-200 transition hover:border-red-300/60 hover:bg-red-500/15 disabled:cursor-not-allowed disabled:opacity-60"
+												aria-label="Delete template"
+											>
+												{deletingId === tpl.id ? "Delete…" : "Delete"}
+											</button>
+										)}
 									<p className="mt-2 text-xs text-slate-300 line-clamp-2">{tpl.description || "No description provided."}</p>
 									<div className="mt-3 flex flex-wrap gap-2 text-xs text-slate-200">
 										<span className="rounded-full border border-white/15 bg-white/5 px-3 py-1">Time {formatDuration(tpl.timeLimit)}</span>
 										<span className="rounded-full border border-white/15 bg-white/5 px-3 py-1">Total {tpl.totalMarks} pts</span>
 										{tpl.createdAt && <span className="rounded-full border border-white/15 bg-white/5 px-3 py-1">{formatDate(tpl.createdAt)}</span>}
 									</div>
-								</button>
+								</div>
 							);
 						})}
 					</div>
@@ -143,19 +197,87 @@ export default function TemplatesSidebar({ templates, loading, error, onReload }
 							<div className="mt-5 space-y-3">
 								<p className="text-sm font-semibold text-indigo-100">Questions</p>
 								<div className="max-h-64 space-y-2 overflow-y-auto pr-1">
-									{(selected.questions || []).map((q, idx) => (
-										<div key={q.id} className="rounded-xl border border-white/10 bg-white/5 p-3 text-sm text-slate-100">
-											<div className="flex items-start justify-between gap-3">
-												<span className="text-xs uppercase tracking-[0.12em] text-indigo-200">Q{idx + 1}</span>
-												{q.marks !== undefined && <span className="rounded-full border border-white/15 bg-white/5 px-2 py-1 text-[11px] text-indigo-100">{q.marks} pts</span>}
+									{(selected.questions || []).map((q, idx) => {
+										const isOpen = openQuestionId === q.id;
+										return (
+											<div key={q.id} className="rounded-xl border border-white/10 bg-white/5 p-3 text-sm text-slate-100">
+												<button
+													type="button"
+													onClick={() => setOpenQuestionId(isOpen ? null : q.id)}
+													className="flex w-full items-start justify-between gap-3 text-left"
+												>
+													<div className="space-y-1">
+														<span className="text-xs uppercase tracking-[0.12em] text-indigo-200">Q{idx + 1}</span>
+														<p className="text-sm font-semibold text-white line-clamp-2">{q.prompt}</p>
+													</div>
+													<div className="flex items-center gap-2">
+														{q.marks !== undefined && <span className="rounded-full border border-white/15 bg-white/5 px-2 py-1 text-[11px] text-indigo-100">{q.marks} pts</span>}
+														<span className="text-xs text-indigo-200">{isOpen ? "Hide" : "Open"}</span>
+													</div>
+												</button>
+												{isOpen && (
+													<div className="mt-2 space-y-2 rounded-lg border border-white/10 bg-slate-950/70 p-3">
+														<p className="text-sm text-slate-100">{q.prompt}</p>
+														<div className="text-xs text-slate-300">Difficulty: {q.difficulty || "-"} · Type: {q.testType || "-"}</div>
+														{q.description && <p className="text-sm text-slate-200">{q.description}</p>}
+														{q.tags?.length ? (
+															<div className="flex flex-wrap gap-2 text-[11px] text-slate-200">
+																{q.tags.map((tag) => (
+																	<span key={tag} className="rounded-full border border-white/15 bg-white/5 px-2 py-1">
+																		{tag}
+																	</span>
+																))}
+															</div>
+														) : null}
+														{q.options?.length ? (
+															<div className="space-y-2 rounded-lg border border-white/10 bg-slate-900/60 p-3 text-sm text-slate-100">
+																<p className="text-xs uppercase tracking-[0.12em] text-indigo-200">Options</p>
+																<div className="space-y-1">
+																	{q.options.map((opt, optIdx) => {
+																		const isCorrect = q.correctOption === optIdx;
+																		return (
+																			<div key={optIdx} className={`flex items-start gap-2 rounded-lg border px-3 py-2 text-sm ${isCorrect ? "border-emerald-400/50 bg-emerald-500/10" : "border-white/10 bg-white/5"}`}>
+																				<span className={`mt-[2px] inline-flex h-6 w-6 items-center justify-center rounded-full text-[11px] font-bold ${isCorrect ? "bg-emerald-500/20 text-emerald-100" : "bg-white/10 text-slate-200"}`}>
+																					{String.fromCharCode(65 + optIdx)}
+																				</span>
+																				<span className="text-slate-100">{opt}</span>
+																				{isCorrect && <span className="ml-auto rounded-full border border-emerald-400/50 bg-emerald-500/15 px-2 py-0.5 text-[11px] font-semibold text-emerald-100">Correct</span>}
+																			</div>
+																	);
+																})}
+																</div>
+															</div>
+														) : null}
+													</div>
+												)}
 											</div>
-											<p className="mt-1 text-sm text-slate-100">{q.prompt}</p>
-											<div className="mt-1 text-xs text-slate-300">
-												{q.difficulty ? `Difficulty: ${q.difficulty}` : "Difficulty: -"}
-											</div>
-										</div>
-									))}
+										);
+									})}
 									{(selected.questions || []).length === 0 && <p className="text-sm text-slate-300">No questions attached yet.</p>}
+								</div>
+							</div>
+						</div>
+					)}
+
+					{confirmingId && (
+						<div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 px-4">
+							<div className="w-full max-w-sm rounded-2xl border border-white/10 bg-slate-950 p-5 shadow-xl shadow-black/40">
+								<h4 className="text-lg font-semibold text-white">Delete template?</h4>
+								<p className="mt-2 text-sm text-slate-200">This action cannot be undone.</p>
+								<div className="mt-4 flex items-center justify-end gap-3">
+									<button
+										onClick={() => setConfirmingId(null)}
+										className="rounded-lg border border-white/15 bg-white/5 px-4 py-2 text-sm font-semibold text-slate-100 transition hover:border-white/30 hover:bg-white/10"
+									>
+										Cancel
+									</button>
+									<button
+										onClick={() => confirmDelete(confirmingId)}
+										disabled={deletingId === confirmingId}
+										className="rounded-lg border border-red-300/60 bg-red-500/20 px-4 py-2 text-sm font-semibold text-red-100 transition hover:border-red-300 hover:bg-red-500/25 disabled:cursor-not-allowed disabled:opacity-60"
+									>
+										{deletingId === confirmingId ? "Deleting…" : "Delete"}
+									</button>
 								</div>
 							</div>
 						</div>

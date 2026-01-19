@@ -8,7 +8,7 @@ const clampLimit = (value, min = 1, max = 50) => {
 };
 
 export async function createInterviewTemplate(req, res) {
-  const { title, description, testType, timeLimit, totalMarks } = req.body ?? {};
+  const { title, description, testType, timeLimit, totalMarks, questionIds } = req.body ?? {};
 
   if (!req.user?._id) {
     return res.status(401).json({ error: "Authentication required." });
@@ -26,7 +26,21 @@ export async function createInterviewTemplate(req, res) {
 
   try {
     const recruiterId = req.user._id;
-    const questions = await loadQuestionsForTestType(testType, { recruiterId });
+
+    let questions;
+    if (Array.isArray(questionIds) && questionIds.length > 0) {
+      // When explicit question IDs are provided, scope them to the recruiter for safety.
+      questions = await InterviewTemplate.db.model("questions").find({
+        _id: { $in: questionIds },
+        createdBy: recruiterId,
+      });
+
+      if (!questions.length) {
+        return res.status(400).json({ error: "No matching questions found for this recruiter." });
+      }
+    } else {
+      questions = await loadQuestionsForTestType(testType, { recruiterId });
+    }
 
     if (!questions.length) {
       return res
@@ -87,7 +101,7 @@ export async function listRecruiterTemplates(req, res) {
         createdAt: 1,
         questions: 1,
       })
-      .populate("questions", "prompt marks difficulty testType");
+      .populate("questions", "prompt description marks difficulty testType options correctOption tags");
 
     return res.json(templates);
   } catch (error) {
@@ -109,5 +123,26 @@ export async function getInterviewTemplateById(req, res) {
   } catch (error) {
     console.error("Failed to fetch interview template", error);
     return res.status(500).json({ error: "Failed to load interview template." });
+  }
+}
+
+export async function deleteInterviewTemplate(req, res) {
+  const { id } = req.params;
+
+  if (!req.user?._id) {
+    return res.status(401).json({ error: "Authentication required." });
+  }
+
+  try {
+    const deleted = await InterviewTemplate.findOneAndDelete({ _id: id, recruiterId: req.user._id });
+
+    if (!deleted) {
+      return res.status(404).json({ error: "Template not found or not owned by you." });
+    }
+
+    return res.json({ success: true });
+  } catch (error) {
+    console.error("Failed to delete interview template", error);
+    return res.status(500).json({ error: "Failed to delete interview template." });
   }
 }
