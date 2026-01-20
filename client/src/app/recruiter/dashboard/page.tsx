@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
-import { useSearchParams } from "next/navigation";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import useAuth from "@/hooks/useAuth";
 import { useRecruiterOverview } from "@/hooks/useRecruiterOverview";
 import { useRecruiterAssignedTests, type RecruiterAssignment } from "@/hooks/useRecruiterAssignedTests";
@@ -10,6 +10,7 @@ import { useRecruiterTemplates } from "@/hooks/useRecruiterTemplates";
 import TopCandidatesSidebar from "@/components/recruiter/TopCandidatesSidebar";
 import TemplatesSidebar from "@/components/recruiter/TemplatesSidebar";
 import QuestionsSidebar from "@/components/recruiter/QuestionsSidebar";
+import AssignInterviewForm from "@/components/recruiter/AssignInterviewForm";
 
 type ActiveTab =
 	| "overview"
@@ -20,14 +21,18 @@ type ActiveTab =
 	| "questions"
 	| "assign";
 
+const ALLOWED_TABS: ActiveTab[] = ["overview", "interviews-pending", "interviews-completed", "results-top", "templates", "questions", "assign"];
+
 // Recruiter dashboard
 export default function RecruiterDashboard() {
 	const { user, loading, error, refresh, logout } = useAuth();
 	const [active, setActive] = useState<ActiveTab>("overview");
+	const router = useRouter();
+	const pathname = usePathname();
 	const searchParams = useSearchParams();
 	const { stats, loading: statsLoading, error: statsError, reload: reloadStats } = useRecruiterOverview(!!user);
 	const { assignments, loading: assignmentsLoading, error: assignmentsError, reload: reloadAssignments } = useRecruiterAssignedTests({
-		enabled: !!user && active === "interviews-pending",
+		enabled: !!user,
 		statuses: ["pending", "in_progress"],
 	});
 	const {
@@ -36,11 +41,11 @@ export default function RecruiterDashboard() {
 		error: completedError,
 		reload: reloadCompleted,
 	} = useRecruiterAssignedTests({
-		enabled: !!user && (active === "interviews-completed" || active === "results-top"),
+		enabled: !!user,
 		statuses: ["completed"],
 	});
 
-	const { templates, loading: templatesLoading, error: templatesError, deletingId, reload: reloadTemplates, deleteTemplate } = useRecruiterTemplates(!!user && active === "templates");
+	const { templates, loading: templatesLoading, error: templatesError, deletingId, reload: reloadTemplates, deleteTemplate } = useRecruiterTemplates(!!user && (active === "templates" || active === "assign"));
 	const [selectedTemplate, setSelectedTemplate] = useState<string | null>(null);
 	const [selectedCompletedTemplate, setSelectedCompletedTemplate] = useState<string | null>(null);
 
@@ -70,14 +75,27 @@ export default function RecruiterDashboard() {
 
 	const selectedCompletedInfo = selectedCompletedTemplate ? groupedCompleted[selectedCompletedTemplate] : null;
 
+	const handleTabChange = (tab: ActiveTab) => {
+		setActive(tab);
+		const params = new URLSearchParams(searchParams.toString());
+		params.set("tab", tab);
+		const queryString = params.toString();
+		router.replace(queryString ? `${pathname}?${queryString}` : pathname);
+	};
+
+	const handleAssigned = () => {
+		reloadAssignments();
+		reloadCompleted();
+		reloadStats();
+	};
+
 	useEffect(() => {
 		const tab = searchParams.get("tab");
 		if (!tab) return;
-		const allowedTabs: ActiveTab[] = ["overview", "interviews-pending", "interviews-completed", "results-top", "templates", "questions", "assign"];
-		if (allowedTabs.includes(tab as ActiveTab) && tab !== active) {
+		if (ALLOWED_TABS.includes(tab as ActiveTab)) {
 			setActive(tab as ActiveTab);
 		}
-	}, [active, searchParams]);
+	}, [searchParams]);
 
 	useEffect(() => {
 		if (selectedTemplate && !groupedAssignments[selectedTemplate]) {
@@ -205,7 +223,7 @@ export default function RecruiterDashboard() {
 					<nav className="space-y-4 text-sm font-semibold text-slate-200">
 						<div className="space-y-2">
 							<button
-								onClick={() => setActive("overview")}
+								onClick={() => handleTabChange("overview")}
 								className={`flex w-full items-center justify-between rounded-xl px-4 py-3 text-left transition ${
 									active === "overview" ? "bg-indigo-500/20 text-white border border-indigo-500/30" : "hover:bg-white/5 border border-transparent"
 								}`}
@@ -223,7 +241,7 @@ export default function RecruiterDashboard() {
 							].map((item) => (
 								<button
 									key={item.key}
-									onClick={() => setActive(item.key)}
+									onClick={() => handleTabChange(item.key)}
 									className={`flex w-full items-center justify-between rounded-xl px-4 py-3 text-left transition ${
 										active === item.key ? "bg-indigo-500/20 text-white border border-indigo-500/30" : "hover:bg-white/5 border border-transparent"
 									}`}
@@ -237,7 +255,7 @@ export default function RecruiterDashboard() {
 						<div className="space-y-2">
 							<p className="px-2 text-xs uppercase tracking-[0.14em] text-indigo-200">Results</p>
 							<button
-								onClick={() => setActive("results-top")}
+								onClick={() => handleTabChange("results-top")}
 								className={`flex w-full items-center justify-between rounded-xl px-4 py-3 text-left transition ${
 									active === "results-top" ? "bg-indigo-500/20 text-white border border-indigo-500/30" : "hover:bg-white/5 border border-transparent"
 								}`}
@@ -249,7 +267,7 @@ export default function RecruiterDashboard() {
 
 						<div className="space-y-2">
 							<button
-								onClick={() => setActive("templates")}
+								onClick={() => handleTabChange("templates")}
 								className={`flex w-full items-center justify-between rounded-xl px-4 py-3 text-left transition ${
 									active === "templates" ? "bg-indigo-500/20 text-white border border-indigo-500/30" : "hover:bg-white/5 border border-transparent"
 								}`}
@@ -261,7 +279,7 @@ export default function RecruiterDashboard() {
 
 						<div className="space-y-2">
 							<button
-								onClick={() => setActive("questions")}
+								onClick={() => handleTabChange("questions")}
 								className={`flex w-full items-center justify-between rounded-xl px-4 py-3 text-left transition ${
 									active === "questions" ? "bg-indigo-500/20 text-white border border-indigo-500/30" : "hover:bg-white/5 border border-transparent"
 								}`}
@@ -273,7 +291,7 @@ export default function RecruiterDashboard() {
 
 						<div className="space-y-2">
 							<button
-								onClick={() => setActive("assign")}
+								onClick={() => handleTabChange("assign")}
 								className={`flex w-full items-center justify-between rounded-xl px-4 py-3 text-left transition ${
 									active === "assign" ? "bg-indigo-500/20 text-white border border-indigo-500/30" : "hover:bg-white/5 border border-transparent"
 								}`}
@@ -310,16 +328,22 @@ export default function RecruiterDashboard() {
 								<div className="rounded-2xl border border-white/10 bg-white/5 p-4">
 									<p className="text-sm font-semibold text-indigo-200">Assign interviews quickly</p>
 									<p className="text-sm text-slate-200">Create or reuse templates to assign to candidates.</p>
-									<Link href="/recruiter/interviews/create" className="mt-2 inline-block text-sm font-semibold text-indigo-200 hover:text-white">
-										Assign now
-									</Link>
+										<button
+											onClick={() => handleTabChange("assign")}
+											className="mt-2 inline-block text-left text-sm font-semibold text-indigo-200 hover:text-white"
+										>
+											Assign now
+										</button>
 								</div>
 								<div className="rounded-2xl border border-white/10 bg-white/5 p-4">
 									<p className="text-sm font-semibold text-indigo-200">Review templates</p>
 									<p className="text-sm text-slate-200">Keep your interview flows standardized.</p>
-									<Link href="/recruiter/interviews" className="mt-2 inline-block text-sm font-semibold text-indigo-200 hover:text-white">
-										Manage templates
-									</Link>
+										<button
+											onClick={() => handleTabChange("templates")}
+											className="mt-2 inline-block text-left text-sm font-semibold text-indigo-200 hover:text-white"
+										>
+											Manage templates
+										</button>
 								</div>
 							</div>
 						</div>
@@ -577,7 +601,8 @@ export default function RecruiterDashboard() {
 					)}
 
 					{active === "questions" && (
-						<div className="grid gap-6 lg:grid-cols-[1.15fr,0.85fr]">
+						// <div className="grid gap-6 lg:grid-cols-[1.15fr,0.85fr]">
+						<div>
 							{/* <div className="space-y-4">
 								<div className="space-y-2">
 									<h1 className="text-2xl font-semibold">Question bank</h1>
@@ -628,14 +653,28 @@ export default function RecruiterDashboard() {
 					)}
 
 					{active === "assign" && (
-						<div className="space-y-3">
-							<h1 className="text-2xl font-semibold">Assign Interview</h1>
-							<p className="text-sm text-slate-300">Send a template to a candidate.</p>
-							<div className="rounded-2xl border border-white/10 bg-white/5 p-4">
-								<p className="text-sm text-slate-200">Pick a template and assign it to candidates with deadlines.</p>
-								<Link href="/recruiter/interviews/create" className="mt-2 inline-block text-sm font-semibold text-indigo-200 hover:text-white">
-									Assign now
-								</Link>
+						<div className="grid gap-6 lg:grid-cols-[1.3fr,0.7fr]">
+							<AssignInterviewForm
+								templates={templates}
+								loading={templatesLoading}
+								error={templatesError}
+								onReloadTemplates={reloadTemplates}
+								onAssigned={handleAssigned}
+							/>
+							<div className="rounded-2xl border border-white/10 bg-slate-950/70 p-6 shadow-inner shadow-indigo-500/10">
+								<p className="text-xs uppercase tracking-[0.14em] text-indigo-200">How it works</p>
+								<h3 className="text-lg font-semibold text-white">Placeholder assignment flow</h3>
+								<ul className="mt-3 space-y-2 text-sm text-slate-300">
+									<li>1) Enter a candidate email to resolve an existing user.</li>
+									<li>2) Pick a template and an expiry time (defaults to 7 days).</li>
+									<li>3) We attach the interview to that candidate; they will see it when starting.</li>
+								</ul>
+								<div className="mt-4 space-y-2 text-sm text-slate-200">
+									<p>Need to update templates first?</p>
+									<Link href="/recruiter/interviews/create" className="font-semibold text-indigo-200 underline-offset-4 hover:text-white hover:underline">
+										Create or edit templates
+									</Link>
+								</div>
 							</div>
 						</div>
 					)}

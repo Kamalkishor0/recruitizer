@@ -21,7 +21,7 @@ export default function QuestionsSidebar({ testType = "multiple_choice", title =
 	}, [questions, search]);
 
 	return (
-		<aside className="rounded-2xl border border-white/10 bg-white/5 p-5 shadow-lg shadow-indigo-500/10">
+		<aside className="flex h-full min-h-0 flex-col rounded-2xl border border-white/10 bg-white/5 p-5 shadow-lg shadow-indigo-500/10">
 			<div className="flex items-start justify-between gap-3">
 				<div>
 					<p className="text-xs uppercase tracking-[0.14em] text-indigo-200">Questions</p>
@@ -52,7 +52,7 @@ export default function QuestionsSidebar({ testType = "multiple_choice", title =
 				{!loading && !error && filtered.length === 0 && <p className="text-sm text-slate-300">No questions found.</p>}
 			</div>
 
-			<div className="mt-4 space-y-3 max-h-96 overflow-y-auto pr-1">
+			<div className="mt-4 flex-1 space-y-3 overflow-y-auto pr-1">
 				{filtered.map((q, idx) => {
 					const isOpen = openId === q.id;
 					return (

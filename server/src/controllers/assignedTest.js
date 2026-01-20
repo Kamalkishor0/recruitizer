@@ -2,6 +2,7 @@ import mongoose from "mongoose";
 import { AssignedTest } from "../models/assignedTest.js";
 import { Submission } from "../models/submission.js";
 import { InterviewTemplate } from "../models/interviewTemplate.js";
+import { User } from "../models/user.js";
 
 const clampLimit = (value, min = 1, max = 20) => {
     const numeric = Number(value);
@@ -10,9 +11,22 @@ const clampLimit = (value, min = 1, max = 20) => {
 };
 
 export async function assignedTestToCandidate(req, res) {
-    const { candidateId, interviewTemplate, status, startTime, endTime, expireAt } = req.body;
-    if(!candidateId || !interviewTemplate || !expireAt|| !Date.parse(expireAt)|| (startTime && isNaN(Date.parse(startTime))) || (endTime && isNaN(Date.parse(endTime)))) {
+    const { candidateId, candidateEmail, interviewTemplate, status, startTime, endTime, expireAt } = req.body;
+
+    const normalizedEmail = typeof candidateEmail === "string" ? candidateEmail.trim().toLowerCase() : null;
+
+    if ((!candidateId && !normalizedEmail) || !interviewTemplate || !expireAt || !Date.parse(expireAt) || (startTime && isNaN(Date.parse(startTime))) || (endTime && isNaN(Date.parse(endTime)))) {
         return res.status(400).json({ error: "Invalid input data" });
+    }
+
+    const candidate = candidateId
+        ? await User.findById(candidateId)
+        : normalizedEmail
+            ? await User.findOne({ email: normalizedEmail })
+            : null;
+
+    if (!candidate) {
+        return res.status(404).json({ error: "Candidate not found" });
     }
 
     // Load template to capture recruiter ownership and validate access.
@@ -27,15 +41,25 @@ export async function assignedTestToCandidate(req, res) {
 
     const newAssignedTest = await AssignedTest.create({
         assignedId: new mongoose.Types.ObjectId().toString(),
-        candidateId,
+        candidateId: candidate._id,
         interviewTemplate,
         recruiterId: template.recruiterId,
         status: status || "pending",
         startTime: startTime ? new Date(startTime) : undefined,
         endTime: endTime ? new Date(endTime) : undefined,
-        expiresAt: new Date(expireAt)
+        expiresAt: new Date(expireAt),
     });
-    res.status(201).json(newAssignedTest);
+
+    res.status(201).json({
+        assignedId: newAssignedTest.assignedId,
+        candidateId: newAssignedTest.candidateId,
+        interviewTemplate: newAssignedTest.interviewTemplate,
+        status: newAssignedTest.status,
+        startTime: newAssignedTest.startTime,
+        endTime: newAssignedTest.endTime,
+        expiresAt: newAssignedTest.expiresAt,
+        createdAt: newAssignedTest.createdAt,
+    });
 }
 
 export async function getAssignedTestsForCandidate(req, res) {
