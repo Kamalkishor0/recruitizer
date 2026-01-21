@@ -7,7 +7,7 @@ const assignedTestSchema = new Schema(
     recruiterId: { type: Schema.Types.ObjectId, ref: "user" },
     status: {
       type: String,
-      enum: ["pending", "in_progress", "completed"],
+      enum: ["pending", "in_progress", "completed", "passed", "failed"],
       default: "pending",
     },
     startTime: { type: Date },

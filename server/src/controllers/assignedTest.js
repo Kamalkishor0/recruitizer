@@ -39,6 +39,15 @@ export async function assignedTestToCandidate(req, res) {
         return res.status(403).json({ error: "You cannot assign a template you don't own" });
     }
 
+    const existing = await AssignedTest.findOne({
+        candidateId: candidate._id,
+        interviewTemplate,
+    });
+
+    if (existing) {
+        return res.status(409).json({ error: "Candidate already has this interview assigned", assignedId: existing.assignedId || existing._id });
+    }
+
     const newAssignedTest = await AssignedTest.create({
         assignedId: new mongoose.Types.ObjectId().toString(),
         candidateId: candidate._id,
@@ -79,7 +88,7 @@ export async function getRecruiterAssignedTests(req, res) {
             return res.status(401).json({ error: "Not authenticated" });
         }
 
-        const allowedStatuses = ["pending", "in_progress", "completed"];
+        const allowedStatuses = ["pending", "in_progress", "completed", "passed", "failed"];
         const requestedStatus = typeof req.query.status === "string" ? req.query.status.split(",") : [];
         const statuses = (requestedStatus.length ? requestedStatus : ["pending", "in_progress"]).map((value) => value.trim()).filter((value) => allowedStatuses.includes(value));
 
@@ -184,7 +193,7 @@ export async function getRecruiterOverview(req, res) {
 
         const totalScheduled = recruiterAssignments.length;
         const pendingCount = recruiterAssignments.filter((row) => row.status === "pending").length;
-        const completedAssignments = recruiterAssignments.filter((row) => row.status === "completed");
+        const completedAssignments = recruiterAssignments.filter((row) => row.status === "completed" || row.status === "passed" || row.status === "failed");
         const completedCount = completedAssignments.length;
 
         let evaluatedAgg = [];
@@ -225,6 +234,103 @@ export async function getRecruiterOverview(req, res) {
     }
 }
 
+const TOP_ASSIGNMENT_STATUSES = ["completed", "passed"];
+
+async function computeTopCandidates(recruiterObjectId, templateObjectId, topLimit) {
+    const matchingAssignments = await AssignedTest.aggregate([
+        { $match: { interviewTemplate: templateObjectId, status: { $in: TOP_ASSIGNMENT_STATUSES } } },
+        {
+            $lookup: {
+                from: "interviewtemplates",
+                localField: "interviewTemplate",
+                foreignField: "_id",
+                as: "template",
+            },
+        },
+        {
+            $addFields: {
+                recruiterIdFilled: {
+                    $ifNull: ["$recruiterId", { $arrayElemAt: ["$template.recruiterId", 0] }],
+                },
+                templateTitle: {
+                    $ifNull: [{ $arrayElemAt: ["$template.title", 0] }, "Untitled template"],
+                },
+            },
+        },
+        {
+            $match: {
+                recruiterIdFilled: recruiterObjectId,
+            },
+        },
+        {
+            $project: {
+                _id: 1,
+                candidateId: 1,
+                templateTitle: 1,
+            },
+        },
+    ]);
+
+    if (!matchingAssignments.length) {
+        return { templateTitle: null, topCandidates: [], totalCandidates: 0 };
+    }
+
+    const assignedIds = matchingAssignments.map((row) => row._id);
+    const templateTitle = matchingAssignments[0].templateTitle;
+
+    const scores = await Submission.aggregate([
+        { $match: { assignedTestId: { $in: assignedIds } } },
+        {
+            $group: {
+                _id: "$assignedTestId",
+                totalScore: { $sum: { $ifNull: ["$score", 0] } },
+                latestSubmissionAt: { $max: "$updatedAt" },
+            },
+        },
+        {
+            $lookup: {
+                from: "assignedtests",
+                localField: "_id",
+                foreignField: "_id",
+                as: "assigned",
+            },
+        },
+        { $unwind: "$assigned" },
+        {
+            $lookup: {
+                from: "users",
+                localField: "assigned.candidateId",
+                foreignField: "_id",
+                as: "candidate",
+            },
+        },
+        { $unwind: "$candidate" },
+        {
+            $group: {
+                _id: "$assigned.candidateId",
+                candidateName: { $first: "$candidate.fullName" },
+                candidateEmail: { $first: "$candidate.email" },
+                score: { $sum: "$totalScore" },
+                submittedAt: { $max: "$latestSubmissionAt" },
+            },
+        },
+        { $sort: { score: -1, submittedAt: -1 } },
+        { $limit: topLimit },
+        {
+            $project: {
+                _id: 0,
+                candidateId: { $toString: "$_id" },
+                candidateName: 1,
+                candidateEmail: 1,
+                score: 1,
+                submittedAt: 1,
+            },
+        },
+    ]);
+
+    return { templateTitle, topCandidates: scores, totalCandidates: scores.length };
+}
+
 // Top candidates for a completed interview template (leaderboard)
 export async function getTopCandidatesForTemplate(req, res) {
     try {
@@ -243,105 +349,80 @@ export async function getTopCandidatesForTemplate(req, res) {
         const templateObjectId = new mongoose.Types.ObjectId(templateId);
         const topLimit = clampLimit(limit, 1, 20);
 
-        const matchingAssignments = await AssignedTest.aggregate([
-            { $match: { interviewTemplate: templateObjectId, status: "completed" } },
-            {
-                $lookup: {
-                    from: "interviewtemplates",
-                    localField: "interviewTemplate",
-                    foreignField: "_id",
-                    as: "template",
-                },
-            },
-            {
-                $addFields: {
-                    recruiterIdFilled: {
-                        $ifNull: ["$recruiterId", { $arrayElemAt: ["$template.recruiterId", 0] }],
-                    },
-                    templateTitle: {
-                        $ifNull: [{ $arrayElemAt: ["$template.title", 0] }, "Untitled template"],
-                    },
-                },
-            },
-            {
-                $match: {
-                    recruiterIdFilled: recruiterObjectId,
-                },
-            },
-            {
-                $project: {
-                    _id: 1,
-                    candidateId: 1,
-                    templateTitle: 1,
-                },
-            },
-        ]);
+        const { templateTitle, topCandidates, totalCandidates } = await computeTopCandidates(recruiterObjectId, templateObjectId, topLimit);
 
-        if (!matchingAssignments.length) {
-            return res.json({ templateId, templateTitle: null, topCandidates: [], totalCandidates: 0 });
+        return res.json({ templateId, templateTitle, totalCandidates, topCandidates });
+    } catch (err) {
+        console.error("Failed to fetch top candidates", err);
+        return res.status(500).json({ error: "Failed to fetch top candidates" });
+    }
+}
+
+// Promote top K candidates for a template to passed and return their contact list
+export async function markTopCandidatesAsPassed(req, res) {
+    try {
+        const recruiterId = req.user?._id;
+        const { templateId, limit } = req.body;
+
+        if (!recruiterId) {
+            return res.status(401).json({ error: "Not authenticated" });
         }
 
-        const assignedIds = matchingAssignments.map(row => row._id);
-        const templateTitle = matchingAssignments[0].templateTitle;
+        if (!templateId || !mongoose.Types.ObjectId.isValid(templateId)) {
+            return res.status(400).json({ error: "Valid templateId is required" });
+        }
 
-        const scores = await Submission.aggregate([
-            { $match: { assignedTestId: { $in: assignedIds } } },
+        const recruiterObjectId = new mongoose.Types.ObjectId(recruiterId);
+        const templateObjectId = new mongoose.Types.ObjectId(templateId);
+        const topLimit = clampLimit(limit, 1, 20);
+
+        const { templateTitle, topCandidates } = await computeTopCandidates(recruiterObjectId, templateObjectId, topLimit);
+
+        if (!topCandidates.length) {
+            return res.json({ templateId, templateTitle, updatedCount: 0, topCandidates: [], emails: [] });
+        }
+
+        const candidateObjectIds = topCandidates
+            .map((candidate) => {
+                try {
+                    return new mongoose.Types.ObjectId(candidate.candidateId);
+                } catch {
+                    return null;
+                }
+            })
+            .filter(Boolean);
+
+        const updateResult = await AssignedTest.updateMany(
             {
-                $group: {
-                    _id: "$assignedTestId",
-                    totalScore: { $sum: { $ifNull: ["$score", 0] } },
-                    latestSubmissionAt: { $max: "$updatedAt" },
-                },
+                interviewTemplate: templateObjectId,
+                candidateId: { $in: candidateObjectIds },
+                status: { $ne: "passed" },
             },
+            { $set: { status: "passed" } },
+        );
+
+        // Mark the remaining completed assignments for this template as failed (excluding those just passed)
+        const failResult = await AssignedTest.updateMany(
             {
-                $lookup: {
-                    from: "assignedtests",
-                    localField: "_id",
-                    foreignField: "_id",
-                    as: "assigned",
-                },
+                interviewTemplate: templateObjectId,
+                candidateId: { $nin: candidateObjectIds },
+                status: { $in: ["completed", "passed"] },
             },
-            { $unwind: "$assigned" },
-            {
-                $lookup: {
-                    from: "users",
-                    localField: "assigned.candidateId",
-                    foreignField: "_id",
-                    as: "candidate",
-                },
-            },
-            { $unwind: "$candidate" },
-            {
-                $group: {
-                    _id: "$assigned.candidateId",
-                    candidateName: { $first: "$candidate.fullName" },
-                    candidateEmail: { $first: "$candidate.email" },
-                    score: { $sum: "$totalScore" },
-                    submittedAt: { $max: "$latestSubmissionAt" },
-                },
-            },
-            { $sort: { score: -1, submittedAt: -1 } },
-            { $limit: topLimit },
-            {
-                $project: {
-                    _id: 0,
-                    candidateId: { $toString: "$_id" },
-                    candidateName: 1,
-                    candidateEmail: 1,
-                    score: 1,
-                    submittedAt: 1,
-                },
-            },
-        ]);
+            { $set: { status: "failed" } },
+        );
+
+        const emails = topCandidates.map((candidate) => candidate.candidateEmail).filter(Boolean);
 
         return res.json({
             templateId,
             templateTitle,
-            totalCandidates: scores.length,
-            topCandidates: scores,
+            updatedCount: updateResult?.modifiedCount ?? 0,
+            failedCount: failResult?.modifiedCount ?? 0,
+            topCandidates,
+            emails,
         });
     } catch (err) {
-        console.error("Failed to fetch top candidates", err);
-        return res.status(500).json({ error: "Failed to fetch top candidates" });
+        console.error("Failed to promote top candidates", err);
+        return res.status(500).json({ error: "Failed to promote top candidates" });
     }
 }

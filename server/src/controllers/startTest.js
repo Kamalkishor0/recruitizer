@@ -24,7 +24,7 @@ export async function startTest(req, res) {
         return res.status(400).json({ error: "Test already started" });
     }
 
-    if (assignedTest.status === "completed") {
+    if (assignedTest.status === "completed" || assignedTest.status === "passed" || assignedTest.status === "failed") {
         return res.status(400).json({ error: "Test already completed" });
     }
 

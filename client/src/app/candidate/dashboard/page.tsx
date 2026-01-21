@@ -4,19 +4,23 @@ import { useEffect, useMemo, useState } from "react";
 import CandidateSidebar, { type CandidateTab } from "@/components/candidate/CandidateSidebar";
 import { useCandidateAssignments, type CandidateAssignment } from "@/hooks/useCandidateAssignments";
 import useAuth from "@/hooks/useAuth";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 
-type AssignmentStatus = "pending" | "in_progress" | "completed";
+type AssignmentStatus = "pending" | "in_progress" | "completed" | "passed" | "failed";
 const STATUS_LABEL: Record<AssignmentStatus, string> = {
   pending: "Scheduled",
   in_progress: "Going on",
   completed: "Completed",
+  passed: "Passed",
+  failed: "Failed",
 };
 
 // Candidate dashboard shell with tabbed sections
 export default function CandidateDashboard() {
   const { user, loading, error, refresh, logout } = useAuth();
-  const [activeTab, setActiveTab] = useState<CandidateTab>("jobs");
+  const searchParams = useSearchParams();
+  const searchTab = (searchParams.get("tab") as CandidateTab | null) ?? "jobs";
+  const [activeTab, setActiveTab] = useState<CandidateTab>(searchTab);
   const [selectedStatus, setSelectedStatus] = useState<AssignmentStatus>("in_progress");
   const router = useRouter();
 
@@ -31,6 +35,8 @@ export default function CandidateDashboard() {
       pending: [],
       in_progress: [],
       completed: [],
+      passed: [],
+      failed: [],
     };
     assignments.forEach((item) => {
       buckets[item.status]?.push(item);
@@ -104,7 +110,13 @@ export default function CandidateDashboard() {
       </header>
 
       <main className="mx-auto flex max-w-6xl gap-6 px-6 pb-14">
-        <CandidateSidebar activeTab={activeTab} onTabChange={setActiveTab} />
+        <CandidateSidebar
+          activeTab={activeTab}
+          onTabChange={(tab) => {
+            setActiveTab(tab);
+            router.replace(`/candidate/dashboard?tab=${tab}`);
+          }}
+        />
 
         <section className="flex-1 space-y-6">
           {activeTab === "jobs" && <JobsLanding />}
@@ -118,7 +130,9 @@ export default function CandidateDashboard() {
               onOpenAssignment={(assignedId) => router.push(`/candidate/interviews/${assignedId}`)}
             />
           )}
-          {activeTab === "results" && <ResultsOverview />}
+          {activeTab === "results" && (
+            <ResultsOverview assignments={assignments} loading={assignmentsLoading} error={assignmentsError} />
+          )}
         </section>
       </main>
     </div>
@@ -186,6 +200,22 @@ function InterviewsOverview({ loading, error, statusBuckets, selectedStatus, onS
         accent: "from-amber-400/25 via-amber-300/15 to-slate-900/70",
         badge: "Co",
         count: statusBuckets.completed.length,
+      },
+      {
+        status: "passed" as const,
+        label: "Passed",
+        description: "Interviews where recruiters marked you as passed",
+        accent: "from-emerald-400/25 via-emerald-300/10 to-slate-900/70",
+        badge: "Pa",
+        count: statusBuckets.passed.length,
+      },
+      {
+        status: "failed" as const,
+        label: "Failed",
+        description: "Interviews where the result was not successful",
+        accent: "from-rose-400/20 via-rose-300/10 to-slate-900/70",
+        badge: "Fa",
+        count: statusBuckets.failed.length,
       },
     ],
     [statusBuckets],
@@ -340,38 +370,59 @@ function StatusDetail({ status, assignments, loading, onBack, onOpenAssignment }
   );
 }
 
-function ResultsOverview() {
+function ResultsOverview({ assignments, loading, error }: { assignments: CandidateAssignment[]; loading: boolean; error: string | null }) {
+  const [tab, setTab] = useState<"passed" | "failed">("passed");
+
+  const filtered = useMemo(() => assignments.filter((item) => item.status === tab), [assignments, tab]);
+
   return (
     <section className="space-y-4">
-      <header className="rounded-2xl border border-white/10 bg-white/5 p-6 shadow-lg shadow-indigo-500/10">
-        <p className="text-xs uppercase tracking-[0.2em] text-amber-200">Results</p>
-        <h2 className="mt-2 text-2xl font-semibold text-white">Completed interview outcomes</h2>
-        <p className="mt-1 text-sm text-slate-300">
-          We will list your scores, feedback, and recruiter decisions here after each interview finishes.
-        </p>
+      <header className="flex flex-col gap-3 rounded-2xl border border-white/10 bg-white/5 p-6 shadow-lg shadow-indigo-500/10 sm:flex-row sm:items-center sm:justify-between">
+        <div>
+          <p className="text-xs uppercase tracking-[0.2em] text-amber-200">Results</p>
+          <h2 className="mt-1 text-2xl font-semibold text-white">Recruiter decisions</h2>
+          <p className="text-sm text-slate-300">See interviews marked as passed or failed after recruiter review.</p>
+        </div>
+        <div className="inline-flex items-center gap-2 rounded-xl border border-white/10 bg-white/5 p-1">
+          {["passed", "failed"].map((key) => {
+            const isActive = tab === key;
+            const label = key === "passed" ? "Passed" : "Failed";
+            return (
+              <button
+                key={key}
+                type="button"
+                onClick={() => setTab(key as "passed" | "failed")}
+                className={`rounded-lg px-4 py-2 text-sm font-semibold transition ${
+                  isActive ? "bg-emerald-500/15 text-emerald-50 border border-emerald-400/40" : "text-slate-200 hover:bg-white/10"
+                }`}
+              >
+                {label}
+              </button>
+            );
+          })}
+        </div>
       </header>
 
-      <div className="grid gap-4 sm:grid-cols-2">
-        <div className="rounded-2xl border border-white/10 bg-gradient-to-br from-amber-500/15 via-amber-400/10 to-slate-900/60 p-5">
-          <p className="text-[12px] uppercase tracking-[0.16em] text-amber-50">Recent results</p>
-          <h3 className="mt-1 text-lg font-semibold text-white">No completed interviews yet</h3>
-          <p className="mt-2 text-sm text-slate-200/90">
-            Once you finish interviews, we will surface scores, notes, and links to detailed feedback here.
-          </p>
-        </div>
+      {error && <div className="rounded-xl border border-rose-500/30 bg-rose-500/10 px-4 py-3 text-sm text-rose-100">{error}</div>}
+      {loading && <div className="rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-slate-200">Loading results...</div>}
+      {!loading && filtered.length === 0 && <div className="rounded-xl border border-white/10 bg-white/5 px-4 py-4 text-sm text-slate-300">No {tab} interviews yet.</div>}
 
-        <div className="rounded-2xl border border-white/10 bg-gradient-to-br from-emerald-400/15 via-emerald-400/10 to-slate-900/60 p-5">
-          <p className="text-[12px] uppercase tracking-[0.16em] text-emerald-50">Next steps</p>
-          <h3 className="mt-1 text-lg font-semibold text-white">Track offers and follow-ups</h3>
-          <p className="mt-2 text-sm text-slate-200/90">
-            We will add links to offer letters, follow-up interviews, and recruiter comments when available.
-          </p>
-          <div className="mt-3 flex flex-wrap gap-2 text-xs text-emerald-50/90">
-            <span className="rounded-full bg-white/10 px-3 py-1">Feedback feed</span>
-            <span className="rounded-full bg-white/10 px-3 py-1">Score breakdown</span>
-            <span className="rounded-full bg-white/10 px-3 py-1">Shareable summaries</span>
-          </div>
-        </div>
+      <div className="grid gap-4 sm:grid-cols-2">
+        {filtered.map((item) => {
+          const title = item.interviewTemplate?.title || "Untitled template";
+          const decidedAt = item.updatedAt ? new Date(item.updatedAt).toLocaleString() : item.createdAt ? new Date(item.createdAt).toLocaleString() : "";
+          return (
+            <div key={item.assignedId || item._id} className="rounded-2xl border border-white/10 bg-white/5 p-5 shadow-inner shadow-black/10">
+              <p className="text-xs uppercase tracking-[0.16em] text-indigo-200">{tab === "passed" ? "Passed" : "Failed"}</p>
+              <h3 className="mt-1 text-lg font-semibold text-white">{title}</h3>
+              <p className="text-sm text-slate-200">Decision posted {decidedAt || "recently"}</p>
+              {item.interviewTemplate?.description && <p className="mt-2 text-sm text-slate-300 line-clamp-3">{item.interviewTemplate.description}</p>}
+              <div className="mt-3 inline-flex rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs font-semibold text-white">
+                Status: {tab === "passed" ? "Passed" : "Failed"}
+              </div>
+            </div>
+          );
+        })}
       </div>
     </section>
   );

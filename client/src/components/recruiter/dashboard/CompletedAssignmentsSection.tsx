@@ -38,8 +38,8 @@ export default function CompletedAssignmentsSection({ assignments, loading, erro
 		<div className="space-y-4">
 			<div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
 				<div>
-					<h1 className="text-2xl font-semibold">Interviews → Completed</h1>
-					<p className="text-sm text-slate-300">Review completed assignments and candidates.</p>
+					<h1 className="text-2xl font-semibold">Interviews → Completed / Passed</h1>
+					<p className="text-sm text-slate-300">Review completed interviews and those you have marked as passed.</p>
 					{error && <p className="text-sm text-red-400">{error}</p>}
 				</div>
 				<div className="flex gap-2">

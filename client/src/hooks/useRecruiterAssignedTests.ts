@@ -2,6 +2,8 @@
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 
+export type RecruiterAssignmentStatus = "pending" | "in_progress" | "completed" | "passed" | "failed";
+
 export type RecruiterAssignment = {
     assignedId: string;
     candidateId: string;
@@ -9,7 +11,7 @@ export type RecruiterAssignment = {
     candidateEmail?: string | null;
     interviewTemplate: string;
     templateTitle: string;
-    status: "pending" | "in_progress" | "completed";
+    status: RecruiterAssignmentStatus;
     startTime?: string;
     createdAt: string;
 };
@@ -18,7 +20,7 @@ const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001";
 
 type Options = {
     enabled: boolean;
-    statuses?: Array<RecruiterAssignment["status"]>;
+    statuses?: Array<RecruiterAssignmentStatus>;
 };
 
 export function useRecruiterAssignedTests(options: Options) {

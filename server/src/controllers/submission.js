@@ -1,5 +1,6 @@
 import { Submission } from "../models/submission.js";
 import { AssignedTest } from "../models/assignedTest.js";
+import { Question } from "../models/questions.js";
 
 export async function submitAnswer(req, res) {
     const { assignedTestId, questionId } = req.params;
@@ -25,10 +26,30 @@ export async function submitAnswer(req, res) {
             .json({ error: "Cannot submit answer for a test that is not in progress" });
     }
 
+    // Auto-grade multiple choice questions
+    const question = await Question.findById(questionId);
+    if (!question) {
+        return res.status(404).json({ error: "Question not found" });
+    }
+
+    let isCorrect = false;
+    let score = 0;
+    let evaluated = false;
+
+    if (question.testType === "multiple_choice") {
+        const numericAnswer = typeof answer === "number" ? answer : Number(answer);
+        isCorrect = Number.isFinite(numericAnswer) && numericAnswer === question.correctOption;
+        score = isCorrect ? (question.marks || 1) : 0;
+        evaluated = true;
+    }
+
     const submission = await Submission.create({
         assignedTestId: assignedTest._id,
         questionId,
-        answer,
+        answer: String(answer),
+        isCorrect,
+        score,
+        evaluated,
     });
 
     return res.status(201).json(submission);

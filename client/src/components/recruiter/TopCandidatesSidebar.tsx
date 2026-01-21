@@ -73,6 +73,10 @@ export default function TopCandidatesSidebar({ assignments, onReload, defaultK =
 	const [loading, setLoading] = useState(false);
 	const [error, setError] = useState<string | null>(null);
 	const [topCandidates, setTopCandidates] = useState<TopCandidate[]>([]);
+	const [marking, setMarking] = useState(false);
+	const [actionMessage, setActionMessage] = useState<string | null>(null);
+	const [copyState, setCopyState] = useState<"idle" | "copied" | "error">("idle");
+	const [approvedEmails, setApprovedEmails] = useState<string[]>([]);
 
 	const loadTopCandidates = useCallback(async (templateId: string, limit: number) => {
 		setLoading(true);
@@ -95,6 +99,52 @@ export default function TopCandidatesSidebar({ assignments, onReload, defaultK =
 		}
 	}, []);
 
+	const emailList = useMemo(() => approvedEmails, [approvedEmails]);
+
+	const handleCopyEmails = useCallback(async () => {
+		if (!emailList.length) return;
+		try {
+			await navigator.clipboard.writeText(emailList.join(", "));
+			setCopyState("copied");
+			window.setTimeout(() => setCopyState("idle"), 1500);
+		} catch (err) {
+			console.error("Failed to copy emails", err);
+			setCopyState("error");
+			window.setTimeout(() => setCopyState("idle"), 2000);
+		}
+	}, [emailList]);
+
+	const handleMarkTopPassed = useCallback(async () => {
+		if (!selectedTemplateId) return;
+		setMarking(true);
+		setError(null);
+		setActionMessage(null);
+		try {
+			const res = await fetch(`${API_BASE}/recruiters/top-candidates/mark-passed`, {
+				method: "POST",
+				headers: { "Content-Type": "application/json" },
+				credentials: "include",
+				body: JSON.stringify({ templateId: selectedTemplateId, limit: k }),
+			});
+			const payload = await res.json().catch(() => ({}));
+			if (!res.ok) {
+				throw new Error((payload as { error?: string }).error || "Failed to mark top candidates as passed");
+			}
+			const nextTop = Array.isArray((payload as { topCandidates?: TopCandidate[] }).topCandidates) ? (payload as { topCandidates: TopCandidate[] }).topCandidates : [];
+			setTopCandidates(nextTop);
+			setApprovedEmails(Array.isArray((payload as { emails?: string[] }).emails) ? ((payload as { emails: string[] }).emails.filter(Boolean)) : []);
+			setActionMessage(`Updated ${Number((payload as { updatedCount?: number }).updatedCount ?? 0)} assignments to passed`);
+			setCopyState("idle");
+			onReload?.();
+		} catch (err) {
+			const message = err instanceof Error ? err.message : "Failed to mark top candidates as passed";
+			setError(message);
+			setActionMessage(null);
+		} finally {
+			setMarking(false);
+		}
+	}, [selectedTemplateId, k, onReload]);
+
 	useEffect(() => {
 		if (!templateCards.length) {
 			setSelectedTemplateId(null);
@@ -112,6 +162,12 @@ export default function TopCandidatesSidebar({ assignments, onReload, defaultK =
 		if (!selectedTemplateId) return;
 		loadTopCandidates(selectedTemplateId, k);
 	}, [selectedTemplateId, k, loadTopCandidates]);
+
+	useEffect(() => {
+		setActionMessage(null);
+		setCopyState("idle");
+		setApprovedEmails([]);
+	}, [selectedTemplateId, k]);
 
 	const selectedTemplate = templateCards.find((card) => card.templateId === selectedTemplateId) || null;
 
@@ -172,6 +228,7 @@ export default function TopCandidatesSidebar({ assignments, onReload, defaultK =
 							max={20}
 							value={k}
 							onChange={(event) => setK(clampK(Number(event.target.value)))}
+							placeholder="Select K"
 							className="w-20 rounded-lg border border-white/15 bg-white/5 px-3 py-2 text-sm text-white outline-none transition focus:border-indigo-400"
 						/>
 					</div>
@@ -204,6 +261,40 @@ export default function TopCandidatesSidebar({ assignments, onReload, defaultK =
 							</div>
 						</div>
 					))}
+				</div>
+
+				<div className="mt-5 space-y-3 rounded-2xl border border-emerald-400/25 bg-emerald-500/5 p-4">
+					<div className="flex flex-wrap items-center justify-between gap-3">
+						<div>
+							<p className="text-xs uppercase tracking-[0.14em] text-emerald-200">Approval step</p>
+							<p className="text-sm font-semibold text-white">Approve top {k}</p>
+							<p className="text-xs text-slate-200">First review the leaderboard. When ready, approve to mark as passed and unlock the email list.</p>
+						</div>
+						<button
+							onClick={handleMarkTopPassed}
+							disabled={marking || !selectedTemplateId || topCandidates.length === 0}
+							className="rounded-lg border border-emerald-400/50 bg-emerald-500/15 px-4 py-2 text-sm font-semibold text-emerald-50 transition hover:border-emerald-300/70 hover:bg-emerald-500/25 disabled:cursor-not-allowed disabled:opacity-60"
+						>
+								{marking ? "Approving..." : `Approve top ${k}`}
+						</button>
+					</div>
+					{actionMessage && <p className="text-xs font-semibold text-emerald-100">{actionMessage}</p>}
+						{emailList.length > 0 && (
+						<div className="space-y-2 rounded-xl border border-white/10 bg-black/30 p-3">
+							<div className="flex items-center justify-between gap-3">
+								<p className="text-xs font-semibold uppercase tracking-[0.12em] text-indigo-200">Emails ({emailList.length})</p>
+								<button
+									onClick={handleCopyEmails}
+										disabled={copyState === "copied" || emailList.length === 0}
+									className="rounded-lg border border-white/15 bg-white/5 px-3 py-1 text-[11px] font-semibold text-white transition hover:border-white/30 hover:bg-white/10 disabled:opacity-70"
+								>
+									{copyState === "copied" ? "Copied" : "Copy emails"}
+								</button>
+							</div>
+							<p className="text-xs leading-relaxed text-slate-100 break-words">{emailList.join(", ")}</p>
+							{copyState === "error" && <p className="text-[11px] text-amber-200">Unable to copy. Select the text above and copy manually.</p>}
+						</div>
+					)}
 				</div>
 			</div>
 		</aside>

@@ -5,11 +5,12 @@ import { useCallback, useEffect, useState } from "react";
 export type CandidateAssignment = {
   _id?: string;
   assignedId?: string;
-  status: "pending" | "in_progress" | "completed";
+  status: "pending" | "in_progress" | "completed" | "passed" | "failed";
   startTime?: string;
   endTime?: string;
   expiresAt?: string;
   createdAt: string;
+  updatedAt?: string;
   interviewTemplate?: {
     _id: string;
     title?: string;

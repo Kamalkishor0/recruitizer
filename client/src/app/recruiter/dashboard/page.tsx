@@ -37,7 +37,7 @@ export default function RecruiterDashboard() {
 		reload: reloadCompleted,
 	} = useRecruiterAssignedTests({
 		enabled: !!user,
-		statuses: ["completed"],
+		statuses: ["completed", "passed"],
 	});
 
 	const { templates, loading: templatesLoading, error: templatesError, deletingId, reload: reloadTemplates, deleteTemplate } = useRecruiterTemplates(

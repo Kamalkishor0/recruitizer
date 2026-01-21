@@ -2,14 +2,15 @@
 
 import Link from "next/link";
 import { useMemo } from "react";
-import { notFound, useParams } from "next/navigation";
+import { notFound, useParams, useRouter } from "next/navigation";
 import { useCandidateAssignments } from "@/hooks/useCandidateAssignments";
 import useAuth from "@/hooks/useAuth";
 
 export default function CandidateInterviewDetailPage() {
   const { assignedId } = useParams<{ assignedId: string }>();
   const { user, loading: authLoading, error: authError } = useAuth();
-  const { assignments, loading, error, reload } = useCandidateAssignments(!!user);
+  const router = useRouter();
+  const { assignments, loading, error } = useCandidateAssignments(!!user);
 
   const match = useMemo(() => assignments.find((item) => (item.assignedId || item._id) === assignedId), [assignments, assignedId]);
 
@@ -45,27 +46,28 @@ export default function CandidateInterviewDetailPage() {
   if (!match) {
     return (
       <main className="p-6 space-y-4 text-white">
-        <h1 className="text-2xl font-semibold">Interview details</h1>
-        {error ? (
-          <p className="text-rose-300">Could not load this interview: {error}</p>
-        ) : (
-          <p className="text-slate-200">We could not find that interview yet. Try refreshing.</p>
-        )}
-        <div className="flex gap-2">
-          <button
-            type="button"
-            onClick={reload}
-            className="rounded-xl border border-white/10 bg-white/10 px-3 py-2 text-sm font-semibold text-white transition hover:border-white/20 hover:bg-white/15"
-          >
-            Refresh
-          </button>
+        <div className="flex items-start justify-between gap-3">
+          <div>
+            <h1 className="text-2xl font-semibold">Interview details</h1>
+            {error ? (
+              <p className="text-rose-300">Could not load this interview: {error}</p>
+            ) : (
+              <p className="text-slate-200">We could not find that interview yet.</p>
+            )}
+          </div>
           <Link
-            href="/candidate/interviews"
-            className="rounded-xl border border-white/10 bg-white/10 px-3 py-2 text-sm font-semibold text-white transition hover:border-white/20 hover:bg-white/15"
+            href="/candidate/dashboard?tab=interviews"
+            className="rounded-xl border border-white/10 bg-white/10 px-4 py-2 text-sm font-semibold text-white transition hover:border-white/20 hover:bg-white/15"
           >
-            Back to interviews
+            Go to dashboard
           </Link>
         </div>
+        <Link
+          href="/candidate/interviews"
+          className="inline-flex w-fit rounded-xl border border-white/10 bg-white/10 px-3 py-2 text-sm font-semibold text-white transition hover:border-white/20 hover:bg-white/15"
+        >
+          Back to interviews
+        </Link>
       </main>
     );
   }
@@ -77,13 +79,26 @@ export default function CandidateInterviewDetailPage() {
   const startsAt = match?.startTime ? new Date(match.startTime).toLocaleString() : "";
   const endsAt = match?.endTime ? new Date(match.endTime).toLocaleString() : "";
   const status = match?.status ? match.status.replace("_", " ") : "";
+  const expiresAt = match?.expiresAt ? new Date(match.expiresAt) : null;
+  const isExpired = expiresAt ? expiresAt.getTime() < Date.now() : false;
+  const canStart = match.status !== "completed" && !isExpired;
+  const startLabel = match.status === "in_progress" ? "Resume interview" : "Start interview";
+  const startPath = `/candidate/interviews/${assignedId}/start`;
 
   return (
     <div className="min-h-screen bg-linear-to-br from-slate-900 via-slate-950 to-black text-white">
-      <header className="mx-auto flex max-w-4xl flex-col gap-2 px-6 pb-6 pt-8">
-        <p className="text-xs uppercase tracking-[0.2em] text-indigo-200">Interview details</p>
-        <h1 className="text-3xl font-semibold">{templateTitle}</h1>
-        <p className="text-sm text-slate-300">Status: {status}</p>
+      <header className="mx-auto flex max-w-4xl flex-col gap-3 px-6 pb-6 pt-8 sm:flex-row sm:items-start sm:justify-between">
+        <div>
+          <p className="text-xs uppercase tracking-[0.2em] text-indigo-200">Interview details</p>
+          <h1 className="text-3xl font-semibold">{templateTitle}</h1>
+          <p className="text-sm text-slate-300">Status: {status}</p>
+        </div>
+        <Link
+          href="/candidate/dashboard?tab=interviews"
+          className="self-start rounded-xl border border-white/10 bg-white/10 px-4 py-2 text-sm font-semibold text-white transition hover:border-white/20 hover:bg-white/15"
+        >
+          Go to dashboard
+        </Link>
       </header>
 
       <main className="mx-auto flex max-w-4xl flex-col gap-5 px-6 pb-14">
@@ -92,17 +107,6 @@ export default function CandidateInterviewDetailPage() {
             {error}
           </div>
         )}
-
-        <div className="flex items-center gap-2 text-sm text-slate-200">
-          {loading && <span>Loading latest data…</span>}
-          <button
-            type="button"
-            onClick={reload}
-            className="rounded-xl border border-white/10 bg-white/10 px-3 py-2 font-semibold text-white transition hover:border-white/20 hover:bg-white/15"
-          >
-            Refresh
-          </button>
-        </div>
 
         <section className="space-y-3 rounded-2xl border border-white/10 bg-white/5 p-6 shadow-inner shadow-indigo-500/10">
           <p className="text-sm text-slate-200">{description}</p>
@@ -117,27 +121,45 @@ export default function CandidateInterviewDetailPage() {
 
         <section className="rounded-2xl border border-white/10 bg-white/5 p-6">
           <h2 className="text-lg font-semibold text-white">Next actions</h2>
-          <p className="mt-2 text-sm text-slate-300">We will surface start/resume links, countdown timers, and checkpoints here.</p>
+          <p className="mt-2 text-sm text-slate-300">
+            Start your interview to view the question set and timer. We will handle coding, multiple choice, and behavioral flows based on the
+            template type.
+          </p>
           <div className="mt-3 flex flex-wrap gap-2">
-            <button
-              type="button"
-              disabled
-              className="rounded-xl border border-emerald-400/40 bg-emerald-400/10 px-4 py-2 text-sm font-semibold text-white opacity-70"
-              aria-disabled
+            {canStart ? (
+              <button
+                type="button"
+                onClick={() => router.push(startPath)}
+                className="rounded-xl border border-emerald-400/40 bg-emerald-400/10 px-4 py-2 text-sm font-semibold text-white transition hover:border-emerald-300/60 hover:bg-emerald-400/20"
+              >
+                {startLabel}
+              </button>
+            ) : (
+              <button
+                type="button"
+                disabled
+                className="rounded-xl border border-white/15 bg-white/5 px-4 py-2 text-sm font-semibold text-white opacity-60"
+                aria-disabled
+              >
+                {isExpired ? "Assignment expired" : "Completed"}
+              </button>
+            )}
+            <Link
+              href="/candidate/interviews"
+              className="rounded-xl border border-white/10 bg-white/10 px-4 py-2 text-sm font-semibold text-white transition hover:border-white/20 hover:bg-white/15"
             >
-              Start interview (coming soon)
-            </button>
+              View all interviews
+            </Link>
           </div>
+          {isExpired && <p className="mt-2 text-xs text-amber-200">This interview assignment has expired.</p>}
         </section>
 
-        <div className="flex items-center gap-3 text-sm text-indigo-100">
-          <Link href="/candidate/interviews" className="rounded-xl border border-white/10 bg-white/10 px-4 py-2 font-semibold transition hover:border-white/20 hover:bg-white/15">
-            Back to interviews
-          </Link>
-          <Link href="/candidate/dashboard" className="text-indigo-200 underline-offset-4 hover:text-white hover:underline">
-            Go to dashboard
-          </Link>
-        </div>
+        <Link
+          href="/candidate/interviews"
+          className="inline-flex w-fit rounded-xl border border-white/10 bg-white/10 px-4 py-2 text-sm font-semibold text-white transition hover:border-white/20 hover:bg-white/15"
+        >
+          Back to interviews
+        </Link>
       </main>
     </div>
   );
