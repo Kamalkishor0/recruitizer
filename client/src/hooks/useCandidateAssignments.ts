@@ -15,6 +15,16 @@ export type CandidateAssignment = {
     _id: string;
     title?: string;
     description?: string;
+    testType?: "coding" | "multiple_choice" | "behavioral";
+    timeLimit?: number;
+    totalMarks?: number;
+    questions?: Array<{
+      _id?: string;
+      prompt?: string;
+      description?: string;
+      options?: string[];
+      marks?: number;
+    }>;
   } | null;
 };
 

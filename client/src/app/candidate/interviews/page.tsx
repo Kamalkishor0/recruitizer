@@ -5,10 +5,13 @@ import { useSearchParams, useRouter } from "next/navigation";
 import { useCandidateAssignments, type CandidateAssignment } from "@/hooks/useCandidateAssignments";
 import useAuth from "@/hooks/useAuth";
 
+// Cover all candidate statuses even if we only render a subset here.
 const STATUS_LABEL: Record<CandidateAssignment["status"], string> = {
   pending: "Scheduled",
   in_progress: "Going on",
   completed: "Completed",
+  passed: "Passed",
+  failed: "Failed",
 };
 
 type StatusKey = keyof typeof STATUS_LABEL;
@@ -32,6 +35,8 @@ export default function CandidateInterviewsPage() {
       pending: [],
       in_progress: [],
       completed: [],
+      passed: [],
+      failed: [],
     };
     assignments.forEach((item) => {
       buckets[item.status]?.push(item);

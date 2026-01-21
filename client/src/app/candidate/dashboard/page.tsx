@@ -144,11 +144,10 @@ function JobsLanding() {
     <section className="rounded-2xl border border-white/10 bg-white/5 p-6 shadow-lg shadow-indigo-500/10">
       <p className="text-xs uppercase tracking-[0.2em] text-emerald-200">Jobs landing</p>
       <h2 className="mt-2 text-2xl font-semibold text-white">Jobs posted by recruiters</h2>
-      <p className="mt-1 text-sm text-slate-300">
-        When recruiters publish roles, they will appear here. For now, this space stays clean so we can wire it up next.
+      <p className="mt-2 inline-flex items-center gap-2 py-1 text-xs font-semibold text-white/80">
+        Coming soon — this section will list open roles as recruiters publish them.
       </p>
-
-      <div className="mt-6 grid gap-4 sm:grid-cols-2">
+      {/* <div className="mt-6 grid gap-4 sm:grid-cols-2">
         {[1, 2, 3, 4].map((idx) => (
           <div
             key={idx}
@@ -158,7 +157,7 @@ function JobsLanding() {
             <p className="mt-2 text-emerald-50/70">We will populate recruiter-posted jobs here with role details and apply actions.</p>
           </div>
         ))}
-      </div>
+      </div> */}
     </section>
   );
 }
