@@ -9,10 +9,9 @@ type PendingAssignmentsSectionProps = {
 	assignments: RecruiterAssignment[];
 	loading: boolean;
 	error: string | null;
-	onRefresh: () => void;
 };
 
-export default function PendingAssignmentsSection({ assignments, loading, error, onRefresh }: PendingAssignmentsSectionProps) {
+export default function PendingAssignmentsSection({ assignments, loading, error }: PendingAssignmentsSectionProps) {
 	const [selectedTemplate, setSelectedTemplate] = useState<string | null>(null);
 
 	const groupedAssignments = useMemo(() => {
@@ -35,29 +34,22 @@ export default function PendingAssignmentsSection({ assignments, loading, error,
 	}, [groupedAssignments, selectedTemplate]);
 
 	return (
-		<div className="space-y-4">
+		<section className="space-y-4">
 			<div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
 				<div>
-					<h1 className="text-2xl font-semibold">Interviews → Pending</h1>
-					<p className="text-sm text-slate-300">Execution tracking for assigned tests (pending / in progress).</p>
-					{error && <p className="text-sm text-red-400">{error}</p>}
+					<p className="text-xs uppercase tracking-[0.18em] text-indigo-200">Interviews</p>
+					<h1 className="text-2xl font-semibold text-white">Pending / In progress</h1>
+					<p className="text-sm text-slate-300">Execution tracking for tests that are scheduled or underway.</p>
+					{error && <p className="mt-2 rounded-md border border-rose-500/30 bg-rose-500/10 px-3 py-2 text-sm text-rose-100">{error}</p>}
 				</div>
-				<div className="flex gap-2">
-					{selectedInfo && (
-						<button
-							onClick={() => setSelectedTemplate(null)}
-							className="h-10 rounded-lg border border-white/15 bg-white/5 px-4 text-sm font-semibold text-indigo-100 transition hover:border-white/30 hover:bg-white/10"
-						>
-							Back to all
-						</button>
-					)}
+				{selectedInfo && (
 					<button
-						onClick={onRefresh}
+						onClick={() => setSelectedTemplate(null)}
 						className="h-10 rounded-lg border border-white/15 bg-white/5 px-4 text-sm font-semibold text-indigo-100 transition hover:border-white/30 hover:bg-white/10"
 					>
-						Refresh
+						Back to all
 					</button>
-				</div>
+				)}
 			</div>
 
 			{selectedInfo ? (
@@ -118,46 +110,46 @@ export default function PendingAssignmentsSection({ assignments, loading, error,
 											</tr>
 										);
 									})}
-								</tbody>
-							</table>
-						</div>
+							</tbody>
+						</table>
 					</div>
 				</div>
-			) : (
-				<div className="grid gap-4 md:grid-cols-2">
-					{loading && <div className="rounded-2xl border border-white/10 bg-white/5 p-6 text-center text-slate-300">Loading assigned tests...</div>}
+			</div>
+		) : (
+			<div className="grid gap-4 md:grid-cols-2">
+				{loading && <div className="rounded-2xl border border-white/10 bg-white/5 p-6 text-center text-slate-300">Loading assigned tests...</div>}
 
-					{!loading && assignments.length === 0 && <div className="rounded-2xl border border-white/10 bg-white/5 p-6 text-center text-slate-300">No pending or in-progress assignments yet.</div>}
+				{!loading && assignments.length === 0 && <div className="rounded-2xl border border-white/10 bg-white/5 p-6 text-center text-slate-300">No pending or in-progress assignments yet.</div>}
 
-					{Object.entries(groupedAssignments).map(([templateId, info]) => {
-						const total = info.items.length;
-						const pendingCount = info.items.filter((row) => row.status === "pending").length;
-						const inProgressCount = info.items.filter((row) => row.status === "in_progress").length;
+				{Object.entries(groupedAssignments).map(([templateId, info]) => {
+					const total = info.items.length;
+					const pendingCount = info.items.filter((row) => row.status === "pending").length;
+					const inProgressCount = info.items.filter((row) => row.status === "in_progress").length;
 
-						return (
-							<div key={templateId} className="rounded-2xl border border-white/10 bg-white/5 shadow-lg shadow-indigo-500/10">
-								<div className="flex items-start justify-between gap-3 p-5">
-									<div className="space-y-2">
-										<p className="text-xs uppercase tracking-[0.14em] text-indigo-200">Interview Template</p>
-										<h3 className="text-lg font-semibold text-white">{info.title}</h3>
-										<div className="flex flex-wrap gap-2 text-xs text-slate-200">
-											<span className="rounded-full border border-white/15 bg-white/5 px-3 py-1">Total: {total}</span>
-											<span className="rounded-full border border-amber-400/30 bg-amber-500/10 px-3 py-1 text-amber-100">Pending: {pendingCount}</span>
-											<span className="rounded-full border border-emerald-400/30 bg-emerald-500/10 px-3 py-1 text-emerald-100">In progress: {inProgressCount}</span>
-										</div>
+					return (
+						<div key={templateId} className="rounded-2xl border border-white/10 bg-gradient-to-br from-indigo-500/10 via-slate-900/60 to-black/40 shadow-lg shadow-indigo-500/10">
+							<div className="flex items-start justify-between gap-3 p-5">
+								<div className="space-y-2">
+									<p className="text-xs uppercase tracking-[0.14em] text-indigo-200">Interview Template</p>
+									<h3 className="text-lg font-semibold text-white">{info.title}</h3>
+									<div className="flex flex-wrap gap-2 text-xs text-slate-200">
+										<span className="rounded-full border border-white/15 bg-white/5 px-3 py-1">Total: {total}</span>
+										<span className="rounded-full border border-amber-400/30 bg-amber-500/10 px-3 py-1 text-amber-100">Pending: {pendingCount}</span>
+										<span className="rounded-full border border-emerald-400/30 bg-emerald-500/10 px-3 py-1 text-emerald-100">In progress: {inProgressCount}</span>
 									</div>
-									<button
-										onClick={() => setSelectedTemplate(templateId)}
-										className="h-10 rounded-lg border border-white/15 bg-white/5 px-4 text-sm font-semibold text-indigo-100 transition hover:border-white/30 hover:bg-white/10"
-									>
-										View
-									</button>
 								</div>
+								<button
+									onClick={() => setSelectedTemplate(templateId)}
+									className="h-10 rounded-lg border border-white/15 bg-white/10 px-4 text-sm font-semibold text-indigo-100 transition hover:border-white/30 hover:bg-white/15"
+								>
+									View details
+								</button>
 							</div>
-						);
-					})}
-				</div>
-			)}
-		</div>
+						</div>
+					);
+				})}
+			</div>
+		)}
+		</section>
 	);
 }

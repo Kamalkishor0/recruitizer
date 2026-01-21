@@ -1,1 +1,0 @@
-// Question display component

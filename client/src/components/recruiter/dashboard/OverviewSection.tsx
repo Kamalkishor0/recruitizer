@@ -11,48 +11,55 @@ type OverviewSectionProps = {
 };
 
 export default function OverviewSection({ stats, loading, error, onNavigate }: OverviewSectionProps) {
-	const cards: { label: string; value: number | string | undefined }[] = [
-		{ label: "Total interviews scheduled", value: stats?.totalScheduled },
-		{ label: "Pending interviews", value: stats?.pendingCount },
-		{ label: "Completed interviews", value: stats?.completedCount },
-		{ label: "Candidates evaluated", value: stats?.candidatesEvaluated },
+	const cards: { label: string; value: number | string | undefined; accent: string }[] = [
+		{ label: "Total interviews scheduled", value: stats?.totalScheduled, accent: "from-indigo-400/25 via-indigo-300/15 to-slate-900/70" },
+		{ label: "Pending interviews", value: stats?.pendingCount, accent: "from-emerald-400/25 via-emerald-300/15 to-slate-900/70" },
+		{ label: "Completed interviews", value: stats?.completedCount, accent: "from-sky-400/25 via-sky-300/15 to-slate-900/70" },
+		{ label: "Candidates evaluated", value: stats?.candidatesEvaluated, accent: "from-amber-300/25 via-amber-200/15 to-slate-900/70" },
 	];
 
 	return (
-		<div className="space-y-4">
-			<h1 className="text-2xl font-semibold">Overview</h1>
-			<p className="text-sm text-slate-300">High-level snapshot of interviews and evaluations.</p>
-			{error && <p className="text-sm text-red-400">{error}</p>}
+		<section className="space-y-5">
+			<p className="text-xs uppercase tracking-[0.2em] text-indigo-200">Overview</p>
+			
 			<div className="grid gap-4 md:grid-cols-2">
 				{cards.map((card) => (
-					<div key={card.label} className="rounded-2xl border border-white/10 bg-white/5 p-4 shadow-sm shadow-indigo-500/10">
-						<p className="text-sm font-semibold text-indigo-200">{card.label}</p>
-						<p className="mt-2 text-3xl font-bold text-white">{loading ? <span className="text-base text-slate-300">Loading…</span> : card.value ?? "—"}</p>
+					<div
+						key={card.label}
+						className={`rounded-2xl border border-white/10 bg-gradient-to-br ${card.accent} p-5 shadow-inner shadow-black/20`}
+					>
+						<p className="text-sm font-semibold text-indigo-100/90">{card.label}</p>
+						<p className="mt-2 text-3xl font-bold text-white">{loading ? <span className="text-base text-slate-200">Loading…</span> : card.value ?? "—"}</p>
 					</div>
 				))}
 			</div>
+
 			<div className="grid gap-4 md:grid-cols-2">
-				<div className="rounded-2xl border border-white/10 bg-white/5 p-4">
-					<p className="text-sm font-semibold text-indigo-200">Assign interviews quickly</p>
-					<p className="text-sm text-slate-200">Create or reuse templates to assign to candidates.</p>
+				<div className="rounded-2xl border border-white/10 bg-white/5 p-5 shadow-lg shadow-indigo-500/10">
+					<p className="text-xs uppercase tracking-[0.16em] text-indigo-200">Assign interviews quickly</p>
+					<h3 className="mt-1 text-lg font-semibold text-white">Send a template to candidates</h3>
+					<p className="text-sm text-slate-200">Reuse a template, set an expiry, and deliver the link instantly.</p>
 					<button
 						onClick={() => onNavigate("assign")}
-						className="mt-2 inline-block text-left text-sm font-semibold text-indigo-200 hover:text-white"
+						className="mt-3 inline-flex items-center gap-2 py-2 text-sm font-semibold"
 					>
 						Assign now
+						<span aria-hidden>→</span>
 					</button>
 				</div>
-				<div className="rounded-2xl border border-white/10 bg-white/5 p-4">
-					<p className="text-sm font-semibold text-indigo-200">Review templates</p>
-					<p className="text-sm text-slate-200">Keep your interview flows standardized.</p>
+				<div className="rounded-2xl border border-white/10 bg-white/5 p-5 shadow-lg shadow-indigo-500/10">
+					<p className="text-xs uppercase tracking-[0.16em] text-indigo-200">Standardize flows</p>
+					<h3 className="mt-1 text-lg font-semibold text-white">Keep templates ready</h3>
+					<p className="text-sm text-slate-200">Update question sets and share them with candidates you want to assign.</p>
 					<button
 						onClick={() => onNavigate("templates")}
-						className="mt-2 inline-block text-left text-sm font-semibold text-indigo-200 hover:text-white"
+						className="mt-3 inline-flex items-center gap-2 py-2 text-sm font-semibold"
 					>
 						Manage templates
+						<span aria-hidden>→</span>
 					</button>
 				</div>
 			</div>
-		</div>
+		</section>
 	);
 }

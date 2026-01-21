@@ -116,9 +116,9 @@ export default function RecruiterDashboard() {
 
 	return (
 		<div className="min-h-screen bg-linear-to-br from-slate-900 via-slate-950 to-black text-white">
-			<DashboardHeader onLogout={logout} />
+			<DashboardHeader user={user} onLogout={logout} />
 
-			<main className="mx-auto flex max-w-6xl gap-6 px-6 pb-14 pt-8">
+			<main className="mx-auto flex max-w-6xl gap-6 px-6 pb-14">
 				<DashboardSidebar active={active} onChange={handleTabChange} user={user} />
 
 				<section className="flex-1 space-y-6">
@@ -131,7 +131,6 @@ export default function RecruiterDashboard() {
 							assignments={assignments}
 							loading={assignmentsLoading}
 							error={assignmentsError}
-							onRefresh={reloadAssignments}
 						/>
 					)}
 
@@ -140,7 +139,6 @@ export default function RecruiterDashboard() {
 							assignments={completedAssignments}
 							loading={completedLoading}
 							error={completedError}
-							onRefresh={reloadCompleted}
 						/>
 					)}
 
