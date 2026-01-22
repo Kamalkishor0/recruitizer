@@ -4,8 +4,7 @@ import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import { notFound, useParams, useRouter, useSearchParams } from "next/navigation";
 import useAuth from "@/hooks/useAuth";
-
-const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001";
+import { API_BASE } from "@/lib/api";
 
 type StoredQuestion = {
   _id?: string;
@@ -235,7 +234,7 @@ export default function QuizWorkspacePage() {
             Go to start screen
           </Link>
           <Link
-            href="/candidate/interviews"
+            href="/candidate/dashboard?tab=interviews"
             className="rounded-xl border border-white/10 bg-white/10 px-4 py-2 text-sm font-semibold text-white transition hover:border-white/20 hover:bg-white/15"
           >
             Back to list
@@ -368,9 +367,6 @@ export default function QuizWorkspacePage() {
             className="rounded-xl border border-white/10 bg-white/10 px-4 py-2 font-semibold transition hover:border-white/20 hover:bg-white/15"
           >
             Back to details
-          </Link>
-          <Link href="/candidate/interviews" className="text-indigo-200 underline-offset-4 hover:text-white hover:underline">
-            View all interviews
           </Link>
         </div>
       </main>

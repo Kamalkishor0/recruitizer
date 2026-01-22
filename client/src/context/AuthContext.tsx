@@ -1,6 +1,7 @@
 "use client";
 
 import { createContext, useCallback, useContext, useEffect, useState, ReactNode } from "react";
+import { API_BASE } from "@/lib/api";
 
 type User = {
 	_id: string;
@@ -17,8 +18,6 @@ type AuthContextValue = {
 	logout: () => Promise<void>;
 	refresh: () => Promise<void>;
 };
-
-const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001";
 
 const AuthContext = createContext<AuthContextValue | undefined>(undefined);
 

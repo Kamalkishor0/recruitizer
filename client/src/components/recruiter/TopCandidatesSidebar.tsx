@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 import type { RecruiterAssignment } from "@/hooks/useRecruiterAssignedTests";
+import { API_BASE } from "@/lib/api";
 
 type TopCandidate = {
 	candidateId: string;
@@ -23,8 +24,6 @@ type TopCandidatesSidebarProps = {
 	onReload?: () => void;
 	defaultK?: number;
 };
-
-const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001";
 
 const clampK = (value: number, min = 1, max = 20) => {
 	const numeric = Number(value);

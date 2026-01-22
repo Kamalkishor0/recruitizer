@@ -5,8 +5,8 @@ import { useEffect, useMemo, useState } from "react";
 import { notFound, useParams, useRouter } from "next/navigation";
 import { useCandidateAssignments, type CandidateAssignment } from "@/hooks/useCandidateAssignments";
 import useAuth from "@/hooks/useAuth";
-
-const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001";
+import { API_BASE } from "@/lib/api";
+import { ASSIGNMENT_STATUS_LABEL } from "@/lib/assignments";
 
 type StartedTestPayload = {
   assignedId?: string;
@@ -57,7 +57,7 @@ export default function StartInterviewPage() {
 
   const expiresAt = assignment?.expiresAt ? new Date(assignment.expiresAt) : null;
   const isExpired = expiresAt ? expiresAt.getTime() < Date.now() : false;
-  const statusLabel = assignment?.status ? assignment.status.replace("_", " ") : "pending";
+  const statusLabel = assignment?.status ? ASSIGNMENT_STATUS_LABEL[assignment.status] ?? assignment.status : "Scheduled";
   const templateTitle = assignment?.interviewTemplate?.title || "Untitled template";
   const testType = assignment?.interviewTemplate?.testType || "multiple_choice";
   const timeLimit = assignment?.interviewTemplate?.timeLimit;
@@ -147,12 +147,7 @@ export default function StartInterviewPage() {
       <main className="p-6 space-y-4 text-white">
         <h1 className="text-2xl font-semibold">Start interview</h1>
         {error ? <p className="text-rose-300">{error}</p> : <p className="text-slate-200">We could not find that assignment.</p>}
-        <Link
-          href="/candidate/interviews"
-          className="inline-flex w-fit rounded-xl border border-white/10 bg-white/10 px-4 py-2 text-sm font-semibold text-white transition hover:border-white/20 hover:bg-white/15"
-        >
-          Back to interviews
-        </Link>
+        
       </main>
     );
   }

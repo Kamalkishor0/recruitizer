@@ -2,18 +2,10 @@
 
 import { useEffect, useMemo, useState } from "react";
 import CandidateSidebar, { type CandidateTab } from "@/components/candidate/CandidateSidebar";
-import { useCandidateAssignments, type CandidateAssignment } from "@/hooks/useCandidateAssignments";
+import { useCandidateAssignments } from "@/hooks/useCandidateAssignments";
 import useAuth from "@/hooks/useAuth";
+import { ASSIGNMENT_STATUS_LABEL, groupAssignmentsByStatus, type AssignmentStatus, type CandidateAssignment } from "@/lib/assignments";
 import { useRouter, useSearchParams } from "next/navigation";
-
-type AssignmentStatus = "pending" | "in_progress" | "completed" | "passed" | "failed";
-const STATUS_LABEL: Record<AssignmentStatus, string> = {
-  pending: "Scheduled",
-  in_progress: "Going on",
-  completed: "Completed",
-  passed: "Passed",
-  failed: "Failed",
-};
 
 // Candidate dashboard shell with tabbed sections
 export default function CandidateDashboard() {
@@ -30,19 +22,7 @@ export default function CandidateDashboard() {
     error: assignmentsError,
   } = useCandidateAssignments(!!user);
 
-  const statusBuckets = useMemo(() => {
-    const buckets: Record<AssignmentStatus, CandidateAssignment[]> = {
-      pending: [],
-      in_progress: [],
-      completed: [],
-      passed: [],
-      failed: [],
-    };
-    assignments.forEach((item) => {
-      buckets[item.status]?.push(item);
-    });
-    return buckets;
-  }, [assignments]);
+  const statusBuckets = useMemo(() => groupAssignmentsByStatus(assignments), [assignments]);
 
   useEffect(() => {
     if (!user) {
@@ -312,7 +292,7 @@ function StatusDetail({ status, assignments, loading, onBack, onOpenAssignment }
     <div className="space-y-4 rounded-2xl border border-white/10 bg-white/5 p-5 shadow-lg shadow-indigo-500/10">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
-          <p className="text-xs uppercase tracking-[0.2em] text-indigo-200">{STATUS_LABEL[status]}</p>
+          <p className="text-xs uppercase tracking-[0.2em] text-indigo-200">{ASSIGNMENT_STATUS_LABEL[status]}</p>
           <h3 className="text-xl font-semibold text-white">Interviews in this state</h3>
           <p className="text-sm text-slate-300">Only the selected category is shown; other tiles are hidden.</p>
         </div>
@@ -345,7 +325,7 @@ function StatusDetail({ status, assignments, loading, onBack, onOpenAssignment }
                   <p className="text-xs text-slate-300">Created {created}</p>
                 </div>
                 <span className="rounded-full border border-white/15 bg-white/10 px-3 py-1 text-xs font-semibold text-white/90">
-                  {STATUS_LABEL[item.status]}
+                  {ASSIGNMENT_STATUS_LABEL[item.status]}
                 </span>
               </div>
               <div className="flex flex-wrap items-center mt-3 gap-2 text-xs text-slate-200">

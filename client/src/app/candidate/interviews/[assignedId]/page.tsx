@@ -5,6 +5,7 @@ import { useMemo } from "react";
 import { notFound, useParams, useRouter } from "next/navigation";
 import { useCandidateAssignments } from "@/hooks/useCandidateAssignments";
 import useAuth from "@/hooks/useAuth";
+import { ASSIGNMENT_STATUS_LABEL } from "@/lib/assignments";
 
 export default function CandidateInterviewDetailPage() {
   const { assignedId } = useParams<{ assignedId: string }>();
@@ -63,7 +64,7 @@ export default function CandidateInterviewDetailPage() {
           </Link>
         </div>
         <Link
-          href="/candidate/interviews"
+          href="/candidate/dashboard?tab=interviews"
           className="inline-flex w-fit rounded-xl border border-white/10 bg-white/10 px-3 py-2 text-sm font-semibold text-white transition hover:border-white/20 hover:bg-white/15"
         >
           Back to interviews
@@ -78,7 +79,7 @@ export default function CandidateInterviewDetailPage() {
   const expires = match?.expiresAt ? new Date(match.expiresAt).toLocaleString() : "";
   const startsAt = match?.startTime ? new Date(match.startTime).toLocaleString() : "";
   const endsAt = match?.endTime ? new Date(match.endTime).toLocaleString() : "";
-  const status = match?.status ? match.status.replace("_", " ") : "";
+  const status = match?.status ? ASSIGNMENT_STATUS_LABEL[match.status] ?? match.status : "";
   const expiresAt = match?.expiresAt ? new Date(match.expiresAt) : null;
   const isExpired = expiresAt ? expiresAt.getTime() < Date.now() : false;
   const canStart = match.status !== "completed" && !isExpired;
@@ -144,18 +145,12 @@ export default function CandidateInterviewDetailPage() {
                 {isExpired ? "Assignment expired" : "Completed"}
               </button>
             )}
-            <Link
-              href="/candidate/interviews"
-              className="rounded-xl border border-white/10 bg-white/10 px-4 py-2 text-sm font-semibold text-white transition hover:border-white/20 hover:bg-white/15"
-            >
-              View all interviews
-            </Link>
           </div>
           {isExpired && <p className="mt-2 text-xs text-amber-200">This interview assignment has expired.</p>}
         </section>
 
         <Link
-          href="/candidate/interviews"
+          href="/candidate/dashboard?tab=interviews"
           className="inline-flex w-fit rounded-xl border border-white/10 bg-white/10 px-4 py-2 text-sm font-semibold text-white transition hover:border-white/20 hover:bg-white/15"
         >
           Back to interviews

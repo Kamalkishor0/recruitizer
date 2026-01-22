@@ -2,8 +2,7 @@
 
 import { FormEvent, useEffect, useMemo, useState } from "react";
 import type { RecruiterTemplate } from "@/hooks/useRecruiterTemplates";
-
-const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001";
+import { API_BASE } from "@/lib/api";
 
 export type AssignInterviewFormProps = {
     templates: RecruiterTemplate[];

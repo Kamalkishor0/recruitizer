@@ -4,8 +4,8 @@ import type { FormEvent } from "react";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import useAuth from "@/hooks/useAuth";
+import { API_BASE } from "@/lib/api";
 
-const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001";
 
 type Role = "candidate" | "recruiter";
 

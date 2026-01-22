@@ -6,8 +6,7 @@ import { FormEvent, useEffect, useMemo, useState } from "react";
 import useAuth from "@/hooks/useAuth";
 import { useQuestions, type NewMCQQuestion } from "@/hooks/useQuestions";
 import QuestionForm from "@/components/recruiter/QuestionForm";
-
-const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001";
+import { API_BASE } from "@/lib/api";
 
 const TEST_TYPES = [
 	{ value: "multiple_choice", label: "Multiple choice", hint: "Uses your MCQs and sets marks automatically." },
