@@ -103,38 +103,38 @@ export default function CompletedAssignmentsSection({ assignments, loading, erro
 											</tr>
 										);
 									})}
-							</tbody>
-						</table>
-					</div>
-				</div>
-			</div>
-		) : (
-			<div className="grid gap-4 md:grid-cols-2">
-				{loading && <div className="rounded-2xl border border-white/10 bg-white/5 p-6 text-center text-slate-300">Loading completed assignments...</div>}
-
-				{!loading && assignments.length === 0 && <div className="rounded-2xl border border-white/10 bg-white/5 p-6 text-center text-slate-300">No completed assignments yet.</div>}
-
-				{Object.entries(groupedAssignments).map(([templateId, info]) => (
-					<div key={templateId} className="rounded-2xl border border-white/10 bg-gradient-to-br from-indigo-500/10 via-slate-900/60 to-black/40 shadow-lg shadow-indigo-500/10">
-						<div className="flex items-start justify-between gap-3 p-5">
-							<div className="space-y-2">
-								<p className="text-xs uppercase tracking-[0.14em] text-indigo-200">Interview Template</p>
-								<h3 className="text-lg font-semibold text-white">{info.title}</h3>
-								<div className="flex flex-wrap gap-2 text-xs text-slate-200">
-									<span className="rounded-full border border-white/15 bg-white/5 px-3 py-1">Completed: {info.items.length}</span>
-								</div>
-							</div>
-							<button
-								onClick={() => setSelectedTemplate(templateId)}
-								className="text-sm text-indigo-100 transition hover:underline"
-							>
-								View details
-							</button>
+								</tbody>
+							</table>
 						</div>
 					</div>
-				))}
-			</div>
-		)}
+				</div>
+			) : (
+				<div className="grid gap-4 md:grid-cols-2">
+					{loading && <div className="rounded-2xl border border-white/10 bg-white/5 p-6 text-center text-slate-300">Loading completed assignments...</div>}
+
+					{!loading && assignments.length === 0 && <div className="rounded-2xl border border-white/10 bg-white/5 p-6 text-center text-slate-300">No completed assignments yet.</div>}
+
+					{Object.entries(groupedAssignments).map(([templateId, info]) => (
+						<div key={templateId} className="rounded-2xl border border-white/10 bg-gradient-to-br from-indigo-500/10 via-slate-900/60 to-black/40 shadow-lg shadow-indigo-500/10">
+							<div className="flex items-start justify-between gap-3 p-5">
+								<div className="max-w-[60%] space-y-2">
+									<p className="text-xs uppercase tracking-[0.14em] text-indigo-200">Interview Template</p>
+									<h3 className="text-lg font-semibold text-white">{info.title}</h3>
+									<div className="flex flex-wrap gap-2 text-xs text-slate-200">
+										<span className="rounded-full border border-white/15 bg-white/5 px-3 py-1">Completed: {info.items.length}</span>
+									</div>
+								</div>
+								<button
+									onClick={() => setSelectedTemplate(templateId)}
+									className="text-xs font-semibold text-indigo-100 underline decoration-transparent hover:decoration-white transition-colors duration-200"
+								>
+									View details
+								</button>
+							</div>
+						</div>
+					))}
+				</div>
+			)}
 		</section>
 	);
 }

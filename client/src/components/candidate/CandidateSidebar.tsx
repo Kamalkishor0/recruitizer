@@ -123,15 +123,6 @@ export default function CandidateSidebar({ activeTab, onTabChange }: CandidateSi
           );
         })}
       </nav>
-
-      {!collapsed && (
-        <div className="rounded-xl border border-white/10 bg-white/5 p-3 text-xs text-slate-200">
-          <p className="font-semibold text-white">Quick tip</p>
-          <p className="mt-1 text-[12px] text-slate-300">
-            Jobs are the landing tab. You can collapse this sidebar anytime to focus on interview details.
-          </p>
-        </div>
-      )}
     </aside>
   );
 }

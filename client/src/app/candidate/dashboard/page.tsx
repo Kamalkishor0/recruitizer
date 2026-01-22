@@ -102,7 +102,7 @@ export default function CandidateDashboard() {
           <button
             type="button"
             onClick={logout}
-            className="rounded-xl px-3 py-2 font-semibold text-white transition hover:border-white/20 hover:bg-white/15"
+            className="px-3 py-2 font-semibold text-white underline decoration-transparent hover:decoration-white transition-colors duration-200"
           >
             Logout
           </button>
@@ -356,7 +356,7 @@ function StatusDetail({ status, assignments, loading, onBack, onOpenAssignment }
                 <button
                   type="button"
                   onClick={() => assignedId && onOpenAssignment(assignedId)}
-                  className="rounded-lg border border-white/10 bg-white/10 px-2 py-1 text-sm font-semibold text-white transition hover:border-white/20 hover:bg-white/15"
+                  className="rounded-lg border border-white/10 bg-white/10 px-2 py-1 text-sm font-semibold text-white underline decoration-transparent hover:decoration-white transition-colors duration-200"
                 >
                   Open details
                 </button>

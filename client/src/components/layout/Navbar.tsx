@@ -10,15 +10,15 @@ export default function Navbar() {
         <div className="flex items-center gap-3">
           <div className="h-10 w-10 rounded-full bg-gradient-to-br from-indigo-400 to-purple-500" />
           <div>
-            <p className="text-xs uppercase tracking-[0.2em] text-indigo-200">AI Interview</p>
-            <p className="text-lg font-semibold">Structured hiring</p>
+            <p className="text-xs uppercase tracking-[0.2em] text-indigo-200">Recruitizer</p>
+            <p className="text-lg font-semibold">AI powered hiring</p>
           </div>
         </div>
         <nav className="flex items-center gap-8 text-sm font-medium text-slate-200">
           {/* <Link href="/" className="transition hover:text-white">Home</Link> */}
-          <Link href="/login" className="transition hover:text-white">Login</Link>
-          <Link href="/register" className="transition hover:text-white">Register</Link>
-          <Link href="/about" className="transition hover:text-white">About</Link>
+          <Link href="/login" className="underline decoration-transparent hover:decoration-white transition-colors duration-200">Login</Link>
+          <Link href="/register" className="underline decoration-transparent hover:decoration-white transition-colors duration-200">Register</Link>
+          <Link href="/about" className="underline decoration-transparent hover:decoration-white transition-colors duration-200">About</Link>
           {/* <div className="flex h-10 w-10 items-center justify-center overflow-hidden rounded-full border border-white/10 bg-white/5">
             <Image
               src="/images/847969.png"

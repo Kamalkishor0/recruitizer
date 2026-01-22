@@ -22,7 +22,7 @@ export default function DashboardHeader({ user, onLogout }: DashboardHeaderProps
 				<button
 					type="button"
 					onClick={onLogout}
-					className="rounded-xl px-3 py-2 font-semibold text-white transition hover:border-white/20 hover:bg-white/15"
+					className="px-3 py-2 font-semibold text-white underline decoration-transparent hover:decoration-white transition-colors duration-200"
 				>
 					Logout
 				</button>

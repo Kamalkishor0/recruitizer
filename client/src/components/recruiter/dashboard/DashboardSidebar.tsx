@@ -158,13 +158,6 @@ export default function DashboardSidebar({ active, onChange, user }: DashboardSi
 					</div>
 				))}
 			</nav>
-
-			{!collapsed && (
-				<div className="rounded-xl border border-white/10 bg-white/5 p-3 text-xs text-slate-200">
-					<p className="font-semibold text-white">Quick tip</p>
-					<p className="mt-1 text-[12px] text-slate-300">Collapse the sidebar for more space while reviewing tables.</p>
-				</div>
-			)}
 		</aside>
 	);
 }

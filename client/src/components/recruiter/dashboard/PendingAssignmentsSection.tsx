@@ -110,46 +110,66 @@ export default function PendingAssignmentsSection({ assignments, loading, error 
 											</tr>
 										);
 									})}
-							</tbody>
-						</table>
+								</tbody>
+							</table>
+						</div>
 					</div>
 				</div>
-			</div>
-		) : (
-			<div className="grid gap-4 md:grid-cols-2">
-				{loading && <div className="rounded-2xl border border-white/10 bg-white/5 p-6 text-center text-slate-300">Loading assigned tests...</div>}
+			) : (
+				<div className="grid gap-4 md:grid-cols-2">
+					{loading && <div className="rounded-2xl border border-white/10 bg-white/5 p-6 text-center text-slate-300">Loading assigned tests...</div>}
 
-				{!loading && assignments.length === 0 && <div className="rounded-2xl border border-white/10 bg-white/5 p-6 text-center text-slate-300">No pending or in-progress assignments yet.</div>}
+					{!loading && assignments.length === 0 && <div className="rounded-2xl border border-white/10 bg-white/5 p-6 text-center text-slate-300">No pending or in-progress assignments yet.</div>}
 
-				{Object.entries(groupedAssignments).map(([templateId, info]) => {
-					const total = info.items.length;
-					const pendingCount = info.items.filter((row) => row.status === "pending").length;
-					const inProgressCount = info.items.filter((row) => row.status === "in_progress").length;
+					{Object.entries(groupedAssignments).map(([templateId, info]) => {
+						const total = info.items.length;
+						const pendingCount = info.items.filter((row) => row.status === "pending").length;
+						const inProgressCount = info.items.filter((row) => row.status === "in_progress").length;
 
-					return (
-						<div key={templateId} className="rounded-2xl border border-white/10 bg-gradient-to-br from-indigo-500/10 via-slate-900/60 to-black/40 shadow-lg shadow-indigo-500/10">
-							<div className="flex items-start justify-between gap-3 p-5">
-								<div className="space-y-2">
-									<p className="text-xs uppercase tracking-[0.14em] text-indigo-200">Interview Template</p>
-									<h3 className="text-lg font-semibold text-white">{info.title}</h3>
-									<div className="flex flex-wrap gap-2 text-xs text-slate-200">
-										<span className="rounded-full border border-white/15 bg-white/5 px-3 py-1">Total: {total}</span>
-										<span className="rounded-full border border-amber-400/30 bg-amber-500/10 px-3 py-1 text-amber-100">Pending: {pendingCount}</span>
-										<span className="rounded-full border border-emerald-400/30 bg-emerald-500/10 px-3 py-1 text-emerald-100">In progress: {inProgressCount}</span>
+						return (
+							<div
+								key={templateId}
+								className="rounded-2xl border border-white/10 bg-gradient-to-br from-indigo-500/10 via-slate-900/60 to-black/40 shadow-lg shadow-indigo-500/10"
+							>
+								<div className="flex h-full flex-col p-5">
+									{/* Top section */}
+									<div className="flex items-start justify-between gap-3">
+										<div className="max-w-[60%] line-clamp-3 space-y-2">
+											<p className="text-xs uppercase tracking-[0.14em] text-indigo-200">
+												Interview Template
+											</p>
+											<h3 className="text-lg font-semibold text-white">
+												{info.title}
+											</h3>
+										</div>
+
+										<button
+											onClick={() => setSelectedTemplate(templateId)}
+											className="text-xs font-semibold text-indigo-100 underline decoration-transparent hover:decoration-white transition-colors duration-200"
+										>
+											View details
+										</button>
+									</div>
+
+									{/* Bottom section (pushed to bottom) */}
+									<div className="mt-auto flex flex-wrap gap-2 pt-4 text-xs text-slate-200">
+										<span className="rounded-full border border-white/15 bg-white/5 px-3 py-1">
+											Total: {total}
+										</span>
+										<span className="rounded-full border border-amber-400/30 bg-amber-500/10 px-3 py-1 text-amber-100">
+											Pending: {pendingCount}
+										</span>
+										<span className="rounded-full border border-emerald-400/30 bg-emerald-500/10 px-3 py-1 text-emerald-100">
+											In progress: {inProgressCount}
+										</span>
 									</div>
 								</div>
-								<button
-									onClick={() => setSelectedTemplate(templateId)}
-									className="h-10 rounded-lg border border-white/15 bg-white/10 px-4 text-sm font-semibold text-indigo-100 transition hover:border-white/30 hover:bg-white/15"
-								>
-									View details
-								</button>
 							</div>
-						</div>
-					);
-				})}
-			</div>
-		)}
+
+						);
+					})}
+				</div>
+			)}
 		</section>
 	);
 }

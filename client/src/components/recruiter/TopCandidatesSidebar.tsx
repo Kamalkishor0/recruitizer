@@ -181,7 +181,7 @@ export default function TopCandidatesSidebar({ assignments, onReload, defaultK =
 				{onReload && (
 					<button
 						onClick={onReload}
-						className="rounded-lg border border-white/15 bg-white/5 px-3 py-2 text-xs font-semibold text-indigo-100 transition hover:border-white/30 hover:bg-white/10"
+						className="text-xs font-semibold text-indigo-100 underline decoration-transparent hover:decoration-white transition-colors duration-200"
 					>
 						Refresh
 					</button>

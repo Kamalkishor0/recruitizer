@@ -11,7 +11,7 @@ export default function RegisterPage() {
 				<section className="lg:w-1/2 space-y-6">
 					<p className="text-sm uppercase tracking-[0.2em] text-indigo-300">Get started</p>
 					<h1 className="text-4xl font-semibold leading-tight">
-						Join AI Interview to run structured, consistent hiring and practicing sessions.
+						Join Recruitizer to run structured, consistent hiring and practicing sessions.
 					</h1>
 					<p className="text-lg text-slate-300">
 						Create an account to launch interviews, invite candidates, and practice coding challenges with live scoring.

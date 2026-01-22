@@ -97,16 +97,7 @@ export default function AssignInterviewForm({ templates, loading = false, error 
                     <p className="text-xs uppercase tracking-[0.14em] text-indigo-200">Assign</p>
                     <h3 className="text-lg font-semibold text-white">Send an interview template</h3>
                     <p className="text-sm text-slate-300">Placeholder flow: resolve a candidate by email and attach a template.</p>
-                </div>
-                {onReloadTemplates && (
-                    <button
-                        type="button"
-                        onClick={onReloadTemplates}
-                        className="h-10 rounded-lg border border-white/15 bg-white/5 px-3 text-sm font-semibold text-indigo-100 transition hover:border-white/30 hover:bg-white/10"
-                    >
-                        Refresh templates
-                    </button>
-                )}
+                </div>  
             </div>
 
             <div className="mt-3 space-y-2">

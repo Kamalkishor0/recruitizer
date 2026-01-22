@@ -41,7 +41,7 @@ export default function OverviewSection({ stats, loading, error, onNavigate }: O
 					<p className="text-sm text-slate-200">Reuse a template, set an expiry, and deliver the link instantly.</p>
 					<button
 						onClick={() => onNavigate("assign")}
-						className="mt-3 inline-flex items-center gap-2 py-2 text-sm font-semibold"
+						className="mt-3 inline-flex items-center gap-2 py-2 text-sm font-semibold underline decoration-transparent hover:decoration-white transition-colors duration-200"
 					>
 						Assign now
 						<span aria-hidden>→</span>
@@ -53,7 +53,7 @@ export default function OverviewSection({ stats, loading, error, onNavigate }: O
 					<p className="text-sm text-slate-200">Update question sets and share them with candidates you want to assign.</p>
 					<button
 						onClick={() => onNavigate("templates")}
-						className="mt-3 inline-flex items-center gap-2 py-2 text-sm font-semibold"
+						className="mt-3 inline-flex items-center gap-2 py-2 text-sm font-semibold underline decoration-transparent hover:decoration-white transition-colors duration-200"
 					>
 						Manage templates
 						<span aria-hidden>→</span>

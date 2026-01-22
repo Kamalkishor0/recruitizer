@@ -78,7 +78,7 @@ export default function TemplatesSidebar({ templates, loading, error, onReload, 
 				{onReload && (
 					<button
 						onClick={onReload}
-						className="rounded-lg border border-white/15 bg-white/5 px-3 py-2 text-xs font-semibold text-indigo-100 transition hover:border-white/30 hover:bg-white/10"
+						className="text-xs font-semibold text-indigo-100 underline decoration-transparent hover:decoration-white transition-colors duration-200"
 					>
 						Refresh
 					</button>
@@ -147,7 +147,7 @@ export default function TemplatesSidebar({ templates, loading, error, onReload, 
 													handleDelete(tpl.id);
 												}}
 												disabled={deletingId === tpl.id}
-												className="absolute right-[0.1rem] top-[0.1rem] px-2 py-1 text-[11px] font-semibold text-red-200 transition hover:border-red-300/60 hover:bg-red-500/15 disabled:cursor-not-allowed disabled:opacity-60"
+												className="absolute right-[0.1rem] top-[0.1rem] px-2 py-1 text-[11px] font-semibold text-red-200 underline decoration-transparent hover:decoration-white transition-colors duration-200"
 												aria-label="Delete template"
 											>
 												{deletingId === tpl.id ? "Delete…" : "Delete"}
