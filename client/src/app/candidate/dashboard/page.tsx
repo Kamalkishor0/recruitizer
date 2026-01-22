@@ -399,6 +399,7 @@ function ResultsOverview({ assignments, loading, error }: { assignments: Candida
               <div className="mt-3 inline-flex rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs font-semibold text-white">
                 Status: {tab === "passed" ? "Passed" : "Failed"}
               </div>
+              {tab === "passed" && <p className="mt-3 text-sm text-emerald-100">Your recruiter will reach out to you by email soon.</p>}
             </div>
           );
         })}

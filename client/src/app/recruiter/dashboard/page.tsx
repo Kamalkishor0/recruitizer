@@ -145,7 +145,7 @@ export default function RecruiterDashboard() {
 					{active === "questions" && <QuestionsSidebar />}
 
 					{active === "results-top" && (
-						<div className="grid gap-6 lg:grid-cols-[1.2fr,0.8fr]">
+						<div>
 							<TopCandidatesSidebar assignments={completedAssignments} onReload={reloadCompleted} />
 						</div>
 					)}
