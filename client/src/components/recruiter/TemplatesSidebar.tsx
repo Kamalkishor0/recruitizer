@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import type { RecruiterTemplate } from "@/hooks/useRecruiterTemplates";
+import GeminiGenerator from "./GeminiGenerator";
 
 const formatDate = (value?: string) => {
 	if (!value) return "-";
@@ -93,6 +94,10 @@ export default function TemplatesSidebar({ templates, loading, error, onReload, 
 
 			{showGrid && (
 				<>
+					<div className="mt-4">
+						<GeminiGenerator onTemplateCreated={onReload} />
+					</div>
+
 					<div className="mt-4 grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
 						<Link
 							href="/recruiter/interviews/create?mode=template"

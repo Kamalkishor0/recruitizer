@@ -8,6 +8,7 @@ import scoringRouter from "./routes/scoring.js";
 import candidateRouter from "./routes/candidate.js";
 import recruiterRouter from "./routes/recruiter.js";
 import submissionsRouter from "./routes/submissions.js";
+import aiRouter from "./routes/ai.js";
 import { authenticate } from "./middlewares/authenticate.js";
 import { authorize } from "./middlewares/role.js";
 const app = express();
@@ -29,6 +30,7 @@ app.use("/candidates", authorize("candidate"), candidateRouter);
 app.use("/recruiters", authorize("recruiter", "admin"), recruiterRouter);
 app.use("/interview-templates", authorize("recruiter", "admin"), interviewTemplateRouter);
 app.use("/questions", authorize("recruiter", "admin"), questionsRouter);
+app.use("/ai", authorize("recruiter", "admin"), aiRouter);
 app.use("/submit", authorize("candidate"), submissionsRouter);
 
 app.get("/", (req, res) => {
