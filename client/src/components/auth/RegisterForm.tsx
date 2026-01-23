@@ -86,6 +86,7 @@ export default function RegisterForm() {
 						required
 						type="text"
 						id="fullName"
+						name="fullName"
 						value={fullName}
 						onChange={(event) => setFullName(event.target.value)}
 						placeholder="Alex Johnson"
@@ -99,6 +100,7 @@ export default function RegisterForm() {
 						required
 						type="email"
 						id="email"
+						name="email"
 						value={email}
 						onChange={(event) => setEmail(event.target.value)}
 						placeholder="you@company.com"
@@ -113,6 +115,7 @@ export default function RegisterForm() {
 							required
 							type="password"
 							id="password"
+							name="password"
 							minLength={6}
 							value={password}
 							onChange={(event) => setPassword(event.target.value)}
@@ -126,6 +129,7 @@ export default function RegisterForm() {
 							required
 							type="password"
 							id="confirmPassword"
+							name="confirmPassword"
 							minLength={6}
 							value={confirmPassword}
 							onChange={(event) => setConfirmPassword(event.target.value)}
@@ -146,6 +150,7 @@ export default function RegisterForm() {
 							<input
 								type="radio"
 								name="role"
+								id="role-candidate"
 								value="candidate"
 								checked={role === "candidate"}
 								onChange={() => setRole("candidate")}
@@ -160,6 +165,7 @@ export default function RegisterForm() {
 							<input
 								type="radio"
 								name="role"
+								id="role-recruiter"
 								value="recruiter"
 								checked={role === "recruiter"}
 								onChange={() => setRole("recruiter")}

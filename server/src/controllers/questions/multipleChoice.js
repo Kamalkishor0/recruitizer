@@ -1,4 +1,5 @@
 import { Question } from "../../models/questions.js";
+import { InterviewTemplate } from "../../models/interviewTemplate.js";
 
 export async function findMultipleChoiceQuestions({ recruiterId } = {}) {
     const query = { testType: "multiple_choice" };
@@ -44,5 +45,35 @@ export async function createMultipleChoiceQuestion(req, res) {
         return res.status(201).json(newQuestion);
     } catch (error) {
         return res.status(500).json({ error: error.message });
+    }
+}
+
+export async function deleteMultipleChoiceQuestion(req, res) {
+    const { id } = req.params;
+
+    if (!req.user?._id) {
+        return res.status(401).json({ error: "Authentication required." });
+    }
+
+    try {
+        const deleted = await Question.findOneAndDelete({
+            _id: id,
+            createdBy: req.user._id,
+            testType: "multiple_choice",
+        });
+
+        if (!deleted) {
+            return res.status(404).json({ error: "Question not found or not owned by you." });
+        }
+
+        // Clean up any templates that referenced this question for the same recruiter.
+        await InterviewTemplate.updateMany(
+            { recruiterId: req.user._id, questions: id },
+            { $pull: { questions: id } },
+        );
+
+        return res.json({ success: true });
+    } catch (error) {
+        return res.status(500).json({ error: "Failed to delete question." });
     }
 }

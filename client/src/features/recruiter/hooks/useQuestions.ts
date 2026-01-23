@@ -43,6 +43,7 @@ export function useQuestions(enabled: boolean, testType: "multiple_choice" = "mu
   const [questions, setQuestions] = useState<MCQQuestion[]>([]);
   const [loading, setLoading] = useState(false);
   const [creating, setCreating] = useState(false);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   const fetchQuestions = useCallback(async () => {
@@ -109,7 +110,50 @@ export function useQuestions(enabled: boolean, testType: "multiple_choice" = "mu
     [testType],
   );
 
-  return { questions, loading, creating, error, reload: fetchQuestions, createMultipleChoice };
+  const deleteMultipleChoice = useCallback(
+    async (id: string): Promise<boolean> => {
+      if (!id || testType !== "multiple_choice") return false;
+      setDeletingId(id);
+      setError(null);
+      try {
+        const token = typeof window !== "undefined" ? localStorage.getItem("token") : null;
+        const headers: Record<string, string> = { "Content-Type": "application/json" };
+        if (token) headers.Authorization = `Bearer ${token}`;
+
+        const res = await fetch(`${API_BASE}/questions/multiple-choice/${id}`, {
+          method: "DELETE",
+          credentials: "include",
+          headers,
+        });
+
+        if (!res.ok) {
+          const body = await res.json().catch(() => ({}));
+          throw new Error(body.error || "Failed to delete question.");
+        }
+
+        setQuestions((prev) => prev.filter((q) => q.id !== id));
+        return true;
+      } catch (err) {
+        const message = err instanceof Error ? err.message : "Failed to delete question.";
+        setError(message);
+        return false;
+      } finally {
+        setDeletingId(null);
+      }
+    },
+    [testType],
+  );
+
+  return {
+    questions,
+    loading,
+    creating,
+    deletingId,
+    error,
+    reload: fetchQuestions,
+    createMultipleChoice,
+    deleteMultipleChoice,
+  };
 }
 
 export type QuestionsHook = ReturnType<typeof useQuestions>;

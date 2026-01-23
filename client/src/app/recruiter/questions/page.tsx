@@ -89,6 +89,8 @@ export default function RecruiterQuestionsPage() {
 								<div className="flex items-center gap-2">
 									<input
 										type="search"
+										id="questions-import-search"
+										name="questionsSearch"
 										value={search}
 										onChange={(e) => setSearch(e.target.value)}
 										placeholder="Search prompt or tags"
@@ -131,6 +133,9 @@ export default function RecruiterQuestionsPage() {
 												<label className="flex items-center gap-2 text-sm text-slate-200">
 													<input
 														type="checkbox"
+														id={`select-import-question-${q.id}`}
+														name="selectedQuestions"
+														value={q.id}
 														checked={selectedIds.has(q.id)}
 														onChange={() => toggleSelect(q.id)}
 														className="h-4 w-4"

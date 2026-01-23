@@ -35,6 +35,7 @@ export default function LoginForm() {
             required
             type="email"
             id="email"
+            name="email"
             value={email}
             onChange={(event) => setEmail(event.target.value)}
             placeholder="you@company.com"
@@ -48,6 +49,7 @@ export default function LoginForm() {
             required
             type="password"
             id="password"
+            name="password"
             value={password}
             onChange={(event) => setPassword(event.target.value)}
             placeholder="••••••••"

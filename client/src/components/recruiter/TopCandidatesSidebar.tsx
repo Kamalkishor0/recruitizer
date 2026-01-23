@@ -25,7 +25,7 @@ type TopCandidatesSidebarProps = {
 	defaultK?: number;
 };
 
-const clampK = (value: number, min = 1, max = 20) => {
+const clampK = (value: number, min = 0, max = 1000) => {
 	const numeric = Number(value);
 	if (!Number.isFinite(numeric)) return min;
 	return Math.min(Math.max(Math.round(numeric), min), max);
@@ -68,7 +68,8 @@ export default function TopCandidatesSidebar({ assignments, onReload, defaultK =
 	}, [assignments]);
 
 	const [selectedTemplateId, setSelectedTemplateId] = useState<string | null>(null);
-	const [k, setK] = useState<number>(defaultK);
+	const [k, setK] = useState<number>(() => clampK(defaultK));
+	const [kInput, setKInput] = useState<string>(() => String(clampK(defaultK)));
 	const [loading, setLoading] = useState(false);
 	const [error, setError] = useState<string | null>(null);
 	const [topCandidates, setTopCandidates] = useState<TopCandidate[]>([]);
@@ -168,6 +169,12 @@ export default function TopCandidatesSidebar({ assignments, onReload, defaultK =
 		setApprovedEmails([]);
 	}, [selectedTemplateId, k]);
 
+	useEffect(() => {
+		const clamped = clampK(defaultK);
+		setK(clamped);
+		setKInput(String(clamped));
+	}, [defaultK]);
+
 	const selectedTemplate = templateCards.find((card) => card.templateId === selectedTemplateId) || null;
 
 	return (
@@ -223,10 +230,15 @@ export default function TopCandidatesSidebar({ assignments, onReload, defaultK =
 						<input
 							id="top-k-input"
 							type="number"
-							min={1}
-							max={20}
-							value={k}
-							onChange={(event) => setK(clampK(Number(event.target.value)))}
+							min={0}
+							max={1000}
+							name="topK"
+							value={kInput}
+							onChange={(event) => {
+								const nextValue = event.target.value;
+								setKInput(nextValue);
+								setK(clampK(Number(nextValue)));
+							}}
 							placeholder="Select K"
 							className="w-20 rounded-lg border border-white/15 bg-white/5 px-3 py-2 text-sm text-white outline-none transition focus:border-indigo-400"
 						/>

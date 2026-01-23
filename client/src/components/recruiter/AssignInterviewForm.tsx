@@ -111,6 +111,8 @@ export default function AssignInterviewForm({ templates, loading = false, error 
                     <input
                         type="email"
                         required
+                        id="candidate-email"
+                        name="candidateEmail"
                         value={candidateEmail}
                         onChange={(e) => setCandidateEmail(e.target.value)}
                         placeholder="candidate@example.com"
@@ -121,6 +123,8 @@ export default function AssignInterviewForm({ templates, loading = false, error 
                 <label className="space-y-2 text-sm">
                     <span className="text-slate-200">Interview template</span>
                     <select
+                        id="interview-template"
+                        name="interviewTemplate"
                         value={selectedTemplateId}
                         onChange={(e) => setSelectedTemplateId(e.target.value)}
                         className="w-full rounded-lg border border-white/15 bg-slate-900/80 px-3 py-2 text-sm text-white outline-none transition focus:border-indigo-400"
@@ -137,6 +141,8 @@ export default function AssignInterviewForm({ templates, loading = false, error 
                     <span className="text-slate-200">Expires at</span>
                     <input
                         type="datetime-local"
+                        id="expires-at"
+                        name="expiresAt"
                         value={expiresAt}
                         min={toLocalInputValue(new Date())}
                         onChange={(e) => setExpiresAt(e.target.value)}

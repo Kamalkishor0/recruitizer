@@ -168,6 +168,8 @@ export default function CreateInterviewTemplatePage() {
 								<input
 									required
 									type="text"
+									id="template-title"
+									name="title"
 									value={title}
 									onChange={(e) => setTitle(e.target.value)}
 									className="w-full rounded-lg border border-white/15 bg-slate-900/80 px-3 py-2 text-sm text-white outline-none transition focus:border-indigo-400"
@@ -177,6 +179,8 @@ export default function CreateInterviewTemplatePage() {
 							<label className="space-y-2 text-sm">
 								<span className="text-slate-200">Description</span>
 								<textarea
+									id="template-description"
+									name="description"
 									value={description}
 									onChange={(e) => setDescription(e.target.value)}
 									className="w-full rounded-lg border border-white/15 bg-slate-900/80 px-3 py-2 text-sm text-white outline-none transition focus:border-indigo-400"
@@ -190,6 +194,8 @@ export default function CreateInterviewTemplatePage() {
 							<label className="space-y-2 text-sm">
 								<span className="text-slate-200">Test type</span>
 								<select
+									id="test-type"
+									name="testType"
 									value={testType}
 									onChange={(e) => setTestType(e.target.value)}
 									className="w-full rounded-lg border border-white/15 bg-slate-900/80 px-3 py-2 text-sm text-white outline-none transition focus:border-indigo-400"
@@ -206,6 +212,8 @@ export default function CreateInterviewTemplatePage() {
 								<input
 									type="number"
 									min={1}
+									id="time-limit"
+									name="timeLimit"
 									value={timeLimit}
 									onChange={(e) => setTimeLimit(Number(e.target.value))}
 									className="w-full rounded-lg border border-white/15 bg-slate-900/80 px-3 py-2 text-sm text-white outline-none transition focus:border-indigo-400"
@@ -216,6 +224,8 @@ export default function CreateInterviewTemplatePage() {
 								<input
 									type="number"
 									min={1}
+									id="total-marks"
+									name="totalMarks"
 									value={totalMarks}
 									onChange={(e) => setTotalMarks(Number(e.target.value))}
 									className="w-full rounded-lg border border-white/15 bg-slate-900/80 px-3 py-2 text-sm text-white outline-none transition focus:border-indigo-400"
@@ -291,6 +301,9 @@ export default function CreateInterviewTemplatePage() {
 											<label className="flex items-center gap-2 text-sm text-slate-100">
 												<input
 													type="checkbox"
+													id={`select-question-${q.id}`}
+													name="selectedQuestions"
+													value={q.id}
 													checked={selectedQuestionIds.has(q.id)}
 													onChange={() => toggleQuestion(q.id)}
 													className="h-4 w-4"

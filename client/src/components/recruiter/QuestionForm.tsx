@@ -101,6 +101,7 @@ export default function QuestionForm({ onSave, loading = false }: QuestionFormPr
 				<label className="text-sm text-slate-200">Prompt</label>
 				<textarea
 					required
+					name="prompt"
 					value={prompt}
 					onChange={(e) => setPrompt(e.target.value)}
 					className="w-full rounded-lg border border-white/15 bg-slate-900/80 px-3 py-2 text-sm text-white outline-none transition focus:border-indigo-400"
@@ -112,6 +113,7 @@ export default function QuestionForm({ onSave, loading = false }: QuestionFormPr
 			<div className="space-y-2">
 				<label className="text-sm text-slate-200">Description (optional)</label>
 				<textarea
+					name="description"
 					value={description}
 					onChange={(e) => setDescription(e.target.value)}
 					className="w-full rounded-lg border border-white/15 bg-slate-900/80 px-3 py-2 text-sm text-white outline-none transition focus:border-indigo-400"
@@ -145,6 +147,7 @@ export default function QuestionForm({ onSave, loading = false }: QuestionFormPr
 							<div className="flex-1 space-y-2">
 								<label className="text-xs uppercase tracking-[0.08em] text-indigo-200">Option {idx + 1}</label>
 								<textarea
+									name={`option-${idx}`}
 									value={opt}
 									onChange={(e) => updateOption(idx, e.target.value)}
 									rows={2}
@@ -169,6 +172,7 @@ export default function QuestionForm({ onSave, loading = false }: QuestionFormPr
 				<label className="space-y-2 text-sm">
 					<span className="text-slate-200">Difficulty</span>
 					<select
+						name="difficulty"
 						value={difficulty}
 						onChange={(e) => setDifficulty(e.target.value as typeof difficulty)}
 						className="w-full rounded-lg border border-white/15 bg-slate-900/80 px-3 py-2 text-sm text-white outline-none transition focus:border-indigo-400"
@@ -183,6 +187,7 @@ export default function QuestionForm({ onSave, loading = false }: QuestionFormPr
 					<input
 						type="number"
 						min={1}
+						name="marks"
 						value={marks}
 						onChange={(e) => setMarks(Number(e.target.value))}
 						className="w-full rounded-lg border border-white/15 bg-slate-900/80 px-3 py-2 text-sm text-white outline-none transition focus:border-indigo-400"
@@ -192,6 +197,7 @@ export default function QuestionForm({ onSave, loading = false }: QuestionFormPr
 					<span className="text-slate-200">Tags (comma separated)</span>
 					<input
 						type="text"
+						name="tags"
 						value={tags}
 						onChange={(e) => setTags(e.target.value)}
 						className="w-full rounded-lg border border-white/15 bg-slate-900/80 px-3 py-2 text-sm text-white outline-none transition focus:border-indigo-400"

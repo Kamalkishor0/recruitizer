@@ -10,15 +10,28 @@ export type QuestionsSidebarProps = {
 };
 
 export default function QuestionsSidebar({ testType = "multiple_choice", title = "Question bank", subtitle = "Pulled from your recruiter collection." }: QuestionsSidebarProps) {
-	const { questions, loading, error, reload } = useQuestions(true, testType);
+	const { questions, loading, error, reload, deleteMultipleChoice, deletingId } = useQuestions(true, testType);
 	const [search, setSearch] = useState("");
 	const [openId, setOpenId] = useState<string | null>(null);
+	const [confirmingId, setConfirmingId] = useState<string | null>(null);
 
 	const filtered = useMemo(() => {
 		const term = search.trim().toLowerCase();
 		if (!term) return questions;
 		return questions.filter((q) => q.prompt.toLowerCase().includes(term) || (q.tags || []).some((tag) => tag.toLowerCase().includes(term)));
 	}, [questions, search]);
+
+	const handleDelete = (id: string) => {
+		setConfirmingId(id);
+	};
+
+	const confirmDelete = async (id: string) => {
+		await deleteMultipleChoice(id);
+		if (openId === id) {
+			setOpenId(null);
+		}
+		setConfirmingId(null);
+	};
 
 	return (
 		<aside className="flex h-full min-h-0 flex-col rounded-2xl border border-white/10 bg-white/5 p-5 shadow-lg shadow-indigo-500/10">
@@ -39,6 +52,8 @@ export default function QuestionsSidebar({ testType = "multiple_choice", title =
 			<div className="mt-3 flex items-center gap-2">
 				<input
 					type="search"
+					id="question-search"
+					name="questionSearch"
 					value={search}
 					onChange={(e) => setSearch(e.target.value)}
 					placeholder="Search prompt or tags"
@@ -56,7 +71,19 @@ export default function QuestionsSidebar({ testType = "multiple_choice", title =
 				{filtered.map((q, idx) => {
 					const isOpen = openId === q.id;
 					return (
-						<div key={q.id} className="rounded-2xl border border-white/10 bg-white/5 p-4">
+						<div key={q.id} className="relative rounded-2xl border border-white/10 bg-white/5 p-3">
+							<button
+								type="button"
+								onClick={(e) => {
+									e.stopPropagation();
+									handleDelete(q.id);
+								}}
+								disabled={deletingId === q.id}
+								className="relative right-2 px-2 text-[11px] font-semibold text-red-200 underline decoration-transparent transition-colors duration-200 hover:decoration-white disabled:cursor-not-allowed disabled:opacity-70"
+								aria-label="Delete question"
+							>
+								{deletingId === q.id ? "Delete…" : "Delete"}
+							</button>
 							<button
 								type="button"
 								onClick={() => setOpenId(isOpen ? null : q.id)}
@@ -106,6 +133,30 @@ export default function QuestionsSidebar({ testType = "multiple_choice", title =
 					);
 				})}
 			</div>
+
+			{confirmingId && (
+				<div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 px-4">
+					<div className="w-full max-w-sm rounded-2xl border border-white/10 bg-slate-950 p-5 shadow-xl shadow-black/40">
+						<h4 className="text-lg font-semibold text-white">Delete question?</h4>
+						<p className="mt-2 text-sm text-slate-200">This will remove it from your bank and any templates using it.</p>
+						<div className="mt-4 flex items-center justify-end gap-3">
+							<button
+								onClick={() => setConfirmingId(null)}
+								className="rounded-lg border border-white/15 bg-white/5 px-4 py-2 text-sm font-semibold text-slate-100 transition hover:border-white/30 hover:bg-white/10"
+							>
+								Cancel
+							</button>
+							<button
+								onClick={() => confirmDelete(confirmingId)}
+								disabled={deletingId === confirmingId}
+								className="rounded-lg border border-red-300/60 bg-red-500/20 px-4 py-2 text-sm font-semibold text-red-100 transition hover:border-red-300 hover:bg-red-500/25 disabled:cursor-not-allowed disabled:opacity-60"
+							>
+								{deletingId === confirmingId ? "Deleting…" : "Delete"}
+							</button>
+						</div>
+					</div>
+				</div>
+			)}
 		</aside>
 	);
 }
