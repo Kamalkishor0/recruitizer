@@ -34,20 +34,20 @@ export default function QuestionsSidebar({ testType = "multiple_choice", title =
 	};
 
 	return (
-		<aside className="flex h-full min-h-0 flex-col rounded-2xl border border-white/10 bg-white/5 p-5 shadow-lg shadow-indigo-500/10">
+		<aside className="flex h-full max-h-screen min-h-0 flex-col rounded-2xl border border-white/10 bg-white/5 p-5 shadow-lg shadow-indigo-500/10 overflow-y-auto">		
 			<div className="flex items-start justify-between gap-3">
-				<div>
-					<p className="text-xs uppercase tracking-[0.14em] text-indigo-200">Questions</p>
-					<h3 className="text-lg font-semibold text-white">{title}</h3>
-					<p className="text-sm text-slate-300">{subtitle}</p>
-				</div>
-				<button
-					onClick={reload}
-						className="text-xs font-semibold text-indigo-100 underline decoration-transparent hover:decoration-white transition-colors duration-200"
-				>
-					Refresh
-				</button>
+			<div>
+				<p className="text-xs uppercase tracking-[0.14em] text-indigo-200">Questions</p>
+				<h3 className="text-lg font-semibold text-white">{title}</h3>
+				<p className="text-sm text-slate-300">{subtitle}</p>
 			</div>
+			<button
+				onClick={reload}
+				className="text-xs font-semibold text-indigo-100 underline decoration-transparent hover:decoration-white transition-colors duration-200"
+			>
+				Refresh
+			</button>
+		</div>
 
 			<div className="mt-3 flex items-center gap-2">
 				<input
@@ -67,7 +67,7 @@ export default function QuestionsSidebar({ testType = "multiple_choice", title =
 				{!loading && !error && filtered.length === 0 && <p className="text-sm text-slate-300">No questions found.</p>}
 			</div>
 
-			<div className="mt-4 flex-1 space-y-3 overflow-y-auto pr-1">
+			<div className="mt-4 flex-1 min-h-0 space-y-3 pr-1">
 				{filtered.map((q, idx) => {
 					const isOpen = openId === q.id;
 					return (
