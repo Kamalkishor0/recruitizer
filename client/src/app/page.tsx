@@ -8,20 +8,16 @@ export default function Home() {
       <Navbar />
 
       <main className="relative overflow-hidden">
-        <div className="pointer-events-none absolute inset-0 opacity-40">
-          <div className="absolute -left-24 top-10 h-80 w-80 rounded-full bg-indigo-600/30 blur-[120px]" />
-          <div className="absolute bottom-10 right-0 h-96 w-96 rounded-full bg-fuchsia-500/20 blur-[140px]" />
-        </div>
 
         <section className="mx-auto max-w-6xl px-6 pb-16 pt-12 lg:flex lg:items-center lg:gap-12">
           <div className="flex-1 space-y-6">
             <p className="text-sm uppercase tracking-[0.2em] text-indigo-200">Hire faster, fairly</p>
             <div className="space-y-4">
               <h1 className="text-4xl font-semibold leading-tight sm:text-5xl">
-                Structured, AI-assisted interviews for recruiters and candidates.
+                AI-assisted and Structured interviews for recruiters and candidates.
               </h1>
               <p className="text-lg text-slate-200 sm:text-xl">
-                Design consistent interview flows, auto-score submissions, and give candidates a transparent way to practice before the real conversation.
+                Design and launch role-specific interview templates in minutes, automate scoring and review candidate submissions all in one place.
               </p>
             </div>
             <div className="flex flex-wrap gap-3">
@@ -47,57 +43,20 @@ export default function Home() {
 
             <div className="grid gap-4 sm:grid-cols-3">
               <div className="rounded-2xl border border-white/10 bg-white/5 p-4 shadow-sm">
-                <p className="text-2xl font-semibold text-white">92%</p>
-                <p className="text-sm text-slate-300">Less time coordinating screening calls</p>
+                <p className="text-2xl font-semibold text-white">Faster</p>
+                <p className="text-sm text-slate-300">Fast and efficient interview process</p>
               </div>
               <div className="rounded-2xl border border-white/10 bg-white/5 p-4 shadow-sm">
-                <p className="text-2xl font-semibold text-white">Real-time</p>
-                <p className="text-sm text-slate-300">Auto-scoring across coding, behavioral, and MCQ</p>
+                <p className="text-2xl font-semibold text-white">Easy</p>
+                <p className="text-sm text-slate-300">User-friendly interface and guided workflows</p>
               </div>
               <div className="rounded-2xl border border-white/10 bg-white/5 p-4 shadow-sm">
                 <p className="text-2xl font-semibold text-white">Two modes</p>
-                <p className="text-sm text-slate-300">Recruiter dashboards and candidate practice</p>
+                <p className="text-sm text-slate-300">Recruiter and candidate dashboards</p>
               </div>
             </div>
           </div>
 
-          <div className="mt-10 flex-1 lg:mt-0">
-            <div className="relative rounded-3xl border border-white/10 bg-white/5 p-6 shadow-xl shadow-indigo-500/10">
-              <div className="absolute -left-10 -top-10 h-24 w-24 rounded-full bg-indigo-500/20 blur-2xl" />
-              <div className="absolute -right-12 bottom-6 h-28 w-28 rounded-full bg-fuchsia-500/20 blur-2xl" />
-              <div className="relative space-y-4">
-                <div className="flex items-center justify-between rounded-2xl border border-white/5 bg-black/40 px-4 py-3">
-                  <p className="text-sm font-semibold text-white">Next interview template</p>
-                  <span className="text-xs rounded-full bg-indigo-500/30 px-3 py-1 text-indigo-100">Live draft</span>
-                </div>
-                <div className="grid gap-3 sm:grid-cols-2">
-                  <div className="rounded-2xl border border-white/10 bg-slate-900/70 p-4">
-                    <p className="text-sm font-semibold text-indigo-200">Coding</p>
-                    <p className="text-sm text-slate-200">Timed editor, language-aware scoring, and hints.</p>
-                  </div>
-                  <div className="rounded-2xl border border-white/10 bg-slate-900/70 p-4">
-                    <p className="text-sm font-semibold text-indigo-200">Behavioral</p>
-                    <p className="text-sm text-slate-200">Calibrated rubrics for consistent evaluations.</p>
-                  </div>
-                  <div className="rounded-2xl border border-white/10 bg-slate-900/70 p-4">
-                    <p className="text-sm font-semibold text-indigo-200">MCQ</p>
-                    <p className="text-sm text-slate-200">Mix of difficulty levels with instant grading.</p>
-                  </div>
-                  <div className="rounded-2xl border border-white/10 bg-slate-900/70 p-4">
-                    <p className="text-sm font-semibold text-indigo-200">Score sheet</p>
-                    <p className="text-sm text-slate-200">Automatic summaries and coaching notes.</p>
-                  </div>
-                </div>
-                <div className="flex items-center justify-between rounded-2xl border border-white/10 bg-white/5 px-4 py-3">
-                  <div>
-                    <p className="text-sm font-semibold text-white">Invite sent</p>
-                    <p className="text-xs text-slate-300">Candidate receives a guided test link</p>
-                  </div>
-                  <div className="rounded-full bg-indigo-500/20 px-3 py-1 text-xs font-semibold text-indigo-100">Ready</div>
-                </div>
-              </div>
-            </div>
-          </div>
         </section>
 
         <section className="mx-auto max-w-6xl px-6 pb-14">
@@ -121,10 +80,10 @@ export default function Home() {
                 <span className="text-xs rounded-full bg-white/10 px-3 py-1 text-slate-100">Operate</span>
               </div>
               <ul className="space-y-3 text-sm text-slate-200">
-                <li className="flex items-start gap-2"><span className="mt-1 h-2 w-2 rounded-full bg-indigo-400" />Launch role-specific templates in minutes.</li>
+                <li className="flex items-start gap-2"><span className="mt-1 h-2 w-2 rounded-full bg-indigo-400" />Launch AI-powered role-specific templates in minutes.</li>
                 <li className="flex items-start gap-2"><span className="mt-1 h-2 w-2 rounded-full bg-indigo-400" />Track submissions, scores, and rubric notes in one dashboard.</li>
-                <li className="flex items-start gap-2"><span className="mt-1 h-2 w-2 rounded-full bg-indigo-400" />Automate invites, reminders, and interviewer assignments.</li>
-                <li className="flex items-start gap-2"><span className="mt-1 h-2 w-2 rounded-full bg-indigo-400" />Export structured feedback to your ATS.</li>
+                <li className="flex items-start gap-2"><span className="mt-1 h-2 w-2 rounded-full bg-indigo-400" />Select candidates with single click.</li>
+                <li className="flex items-start gap-2"><span className="mt-1 h-2 w-2 rounded-full bg-indigo-400" />Fast recruitment workflows.</li>
               </ul>
             </div>
 
@@ -134,32 +93,11 @@ export default function Home() {
                 <span className="text-xs rounded-full bg-indigo-500/20 px-3 py-1 text-indigo-100">Practice</span>
               </div>
               <ul className="space-y-3 text-sm text-slate-200">
-                <li className="flex items-start gap-2"><span className="mt-1 h-2 w-2 rounded-full bg-indigo-400" />Guided coding, behavioral, and multiple-choice sessions.</li>
-                <li className="flex items-start gap-2"><span className="mt-1 h-2 w-2 rounded-full bg-indigo-400" />Live code editor with test cases and timed checkpoints.</li>
-                <li className="flex items-start gap-2"><span className="mt-1 h-2 w-2 rounded-full bg-indigo-400" />Score breakdowns and coaching notes after submission.</li>
-                <li className="flex items-start gap-2"><span className="mt-1 h-2 w-2 rounded-full bg-indigo-400" />Rehearse as many times as you want before an invite.</li>
+                <li className="flex items-start gap-2"><span className="mt-1 h-2 w-2 rounded-full bg-indigo-400" />Track your scheduled or completed interviews</li>
+                <li className="flex items-start gap-2"><span className="mt-1 h-2 w-2 rounded-full bg-indigo-400" />Give tests in a distraction-free environment with a built-in code editor(coming soon) and timer.</li>
+                <li className="flex items-start gap-2"><span className="mt-1 h-2 w-2 rounded-full bg-indigo-400" />Submit your answers before the deadline.</li>
+                <li className="flex items-start gap-2"><span className="mt-1 h-2 w-2 rounded-full bg-indigo-400" />Receive updates of your interview status by recruiter on your dashboard.</li>
               </ul>
-            </div>
-          </div>
-        </section>
-
-        <section className="mx-auto max-w-6xl px-6 pb-16">
-          <div className="mb-8 text-center">
-            <p className="text-sm uppercase tracking-[0.2em] text-indigo-200">How it works</p>
-            <h2 className="mt-2 text-2xl font-semibold sm:text-3xl">A clean, predictable interview loop</h2>
-          </div>
-          <div className="grid gap-6 md:grid-cols-3">
-            <div className="rounded-3xl border border-white/10 bg-white/5 p-5">
-              <p className="text-sm font-semibold text-indigo-200">1. Configure</p>
-              <p className="mt-2 text-sm text-slate-200">Select coding, behavioral, or MCQ modules, set timers, and define rubrics.</p>
-            </div>
-            <div className="rounded-3xl border border-white/10 bg-slate-900/70 p-5">
-              <p className="text-sm font-semibold text-indigo-200">2. Invite</p>
-              <p className="mt-2 text-sm text-slate-200">Send a branded link; candidates complete guided sessions on their time.</p>
-            </div>
-            <div className="rounded-3xl border border-white/10 bg-white/5 p-5">
-              <p className="text-sm font-semibold text-indigo-200">3. Score</p>
-              <p className="mt-2 text-sm text-slate-200">Review auto-scores, add qualitative notes, and compare candidates fairly.</p>
             </div>
           </div>
         </section>
