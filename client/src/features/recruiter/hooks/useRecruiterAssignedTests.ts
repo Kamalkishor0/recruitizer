@@ -14,6 +14,7 @@ export type RecruiterAssignment = {
   templateTitle: string;
   status: RecruiterAssignmentStatus;
   startTime?: string;
+  score?: number | null;
   createdAt: string;
 };
 

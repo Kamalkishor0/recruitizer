@@ -1,6 +1,5 @@
 "use client";
 
-import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import { formatAssignmentDate, getStatusTone } from "./assignmentHelpers";
 import type { RecruiterAssignment } from "@/hooks/useRecruiterAssignedTests";
@@ -75,7 +74,7 @@ export default function CompletedAssignmentsSection({ assignments, loading, erro
 										<th className="px-6 py-3">Candidate</th>
 										<th className="px-6 py-3">Status</th>
 										<th className="px-6 py-3">Start time</th>
-										<th className="px-6 py-3 text-right">Action</th>
+										<th className="px-6 py-3 text-right">Score</th>
 									</tr>
 								</thead>
 								<tbody className="divide-y divide-white/5">
@@ -92,14 +91,7 @@ export default function CompletedAssignmentsSection({ assignments, loading, erro
 													</span>
 												</td>
 												<td className="px-6 py-4 text-slate-200">{assignment.startTime ? formatAssignmentDate(assignment.startTime) : "Not started"}</td>
-												<td className="px-6 py-4 text-right">
-													<Link
-														href={`/recruiter/interviews/${assignment.assignedId}`}
-														className="inline-flex items-center rounded-lg border border-white/15 px-4 py-2 text-sm font-semibold text-indigo-100 transition hover:border-white/30 hover:bg-white/10"
-													>
-														View more
-													</Link>
-												</td>
+												<td className="px-6 py-4 text-right text-slate-100">{typeof assignment.score === "number" ? assignment.score : "Not scored"}</td>
 											</tr>
 										);
 									})}

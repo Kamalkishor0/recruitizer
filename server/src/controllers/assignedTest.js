@@ -138,6 +138,25 @@ export async function getRecruiterAssignedTests(req, res) {
                 },
             },
             {
+                $lookup: {
+                    from: "submissions",
+                    localField: "_id",
+                    foreignField: "assignedTestId",
+                    as: "submissions",
+                },
+            },
+            {
+                $addFields: {
+                    score: {
+                        $cond: [
+                            { $gt: [{ $size: "$submissions" }, 0] },
+                            { $sum: "$submissions.score" },
+                            null,
+                        ],
+                    },
+                },
+            },
+            {
                 $project: {
                     _id: 0,
                     assignedId: 1,
@@ -148,6 +167,7 @@ export async function getRecruiterAssignedTests(req, res) {
                     templateTitle: 1,
                     status: 1,
                     startTime: 1,
+                    score: 1,
                     createdAt: 1,
                 },
             },

@@ -1,5 +1,7 @@
+import bcrypt from "bcrypt";
 import { User } from "../models/user.js";
-import { validateToken } from "../utils/authentication.js";
+import { createTokenForUser } from "../utils/authentication.js";
+import { createAuth0User, sendVerificationEmail, fetchEmailVerificationStatus } from "../utils/auth0.js";
 
 export function renderSignin(req, res) {
   res.json({ message: "Render signin page" });
@@ -17,9 +19,41 @@ export async function signin(req, res) {
   }
 
   try {
-    const token = await User.matchPasswordAndGenerateToken(email, password);
+    const user = await User.findOne({ email });
+    if (!user) {
+      return res.status(401).json({ error: "Invalid email or password" });
+    }
 
-    const user = validateToken(token);
+    const isPasswordMatch = await bcrypt.compare(password, user.password);
+    if (!isPasswordMatch) {
+      return res.status(401).json({ error: "Invalid email or password" });
+    }
+
+    const verification = await fetchEmailVerificationStatus({ auth0UserId: user.auth0UserId, email: user.email });
+
+    if (!verification.verified) {
+      if (!user.auth0UserId && verification.auth0UserId) {
+        user.auth0UserId = verification.auth0UserId;
+        await user.save();
+      }
+      return res.status(403).json({ error: "Please verify your email before signing in." });
+    }
+
+    if (!user.emailVerified || (!user.auth0UserId && verification.auth0UserId)) {
+      user.emailVerified = true;
+      if (verification.auth0UserId) {
+        user.auth0UserId = verification.auth0UserId;
+      }
+      await user.save();
+    }
+
+    const token = createTokenForUser(user);
+    const userPayload = {
+      _id: user._id,
+      email: user.email,
+      role: user.role,
+      fullName: user.fullName,
+    };
 
     res.cookie("token", token, {
       httpOnly: true,
@@ -28,9 +62,10 @@ export async function signin(req, res) {
       maxAge: 24 * 60 * 60 * 1000,
     });
 
-    return res.json({ token, user });
+    return res.json({ token, user: userPayload });
   } catch (err) {
-    return res.status(401).json({ error: "Invalid email or password" });
+    const message = err instanceof Error ? err.message : "Unable to sign in";
+    return res.status(500).json({ error: message });
   }
 }
 
@@ -51,10 +86,32 @@ export async function signup(req, res) {
   };
 
   try {
-    await User.create(payload);
-    return res.redirect("/");
+    const existingUser = await User.findOne({ email });
+    if (existingUser) {
+      return res.status(400).json({ error: "Account already exists. Please sign in." });
+    }
+
+    const auth0User = await createAuth0User({
+      email,
+      password,
+      fullName,
+      role,
+    });
+
+    await sendVerificationEmail(auth0User.user_id);
+
+    await User.create({
+      ...payload,
+      auth0UserId: auth0User.user_id,
+      emailVerified: false,
+    });
+
+    return res
+      .status(201)
+      .json({ message: "Account created. Check your email to verify before signing in." });
   } catch (err) {
-    return res.status(400).json({ error: "Could not create account." });
+    const message = err instanceof Error ? err.message : "Could not create account.";
+    return res.status(400).json({ error: message });
   }
 }
 

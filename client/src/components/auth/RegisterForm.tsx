@@ -2,7 +2,6 @@
 
 import type { FormEvent } from "react";
 import { useState } from "react";
-import { useRouter } from "next/navigation";
 import useAuth from "@/hooks/useAuth";
 import { API_BASE } from "@/lib/api";
 
@@ -10,8 +9,7 @@ import { API_BASE } from "@/lib/api";
 type Role = "candidate" | "recruiter";
 
 export default function RegisterForm() {
-	const router = useRouter();
-	const { login, loading: authLoading } = useAuth();
+	const { loading: authLoading } = useAuth();
 
 	const [fullName, setFullName] = useState("");
 	const [email, setEmail] = useState("");
@@ -52,18 +50,13 @@ export default function RegisterForm() {
 				throw new Error(body.error || "Could not create account.");
 			}
 
-			setFormMessage("Account created. Signing you in...");
-
-			try {
-				const loggedInUser = await login(email, password);
-				const nextRole = loggedInUser?.role === "recruiter" ? "recruiter" : "candidate";
-				const target = nextRole === "recruiter" ? "/recruiter/dashboard" : "/candidate/dashboard";
-				router.push(target);
-				return;
-			} catch {
-				setFormError("Account created, but automatic login failed. Please try signing in.");
-				return;
-			}
+			const body = await signupResponse.json().catch(() => ({}));
+			setFormMessage(body.message || "Account created. Please verify your email before signing in.");
+			setFullName("");
+			setEmail("");
+			setPassword("");
+			setConfirmPassword("");
+			return;
 		} catch (err) {
 			const message = err instanceof Error ? err.message : "Registration failed. Please try again.";
 			setFormError(message);
