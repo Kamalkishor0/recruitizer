@@ -9,8 +9,11 @@ import { API_BASE } from "@/lib/api";
 type Role = "candidate" | "recruiter";
 
 export default function RegisterForm() {
+	//Nothing just destructuring to get loading state and rename it to authLoading
 	const { loading: authLoading } = useAuth();
-
+	// We are using these state so we can have controlled inputs
+	// In other words, whenever the user types something, 
+	// we update the state by rendering the component again
 	const [fullName, setFullName] = useState("");
 	const [email, setEmail] = useState("");
 	const [password, setPassword] = useState("");
@@ -24,7 +27,8 @@ export default function RegisterForm() {
 		event.preventDefault();
 		setFormError(null);
 		setFormMessage(null);
-
+		
+		//Only spaces is not allowed
 		if (!fullName.trim() || !email.trim() || !password.trim()) {
 			setFormError("Please fill out all required fields.");
 			return;
@@ -51,7 +55,7 @@ export default function RegisterForm() {
 			}
 
 			const body = await signupResponse.json().catch(() => ({}));
-			setFormMessage(body.message || "Account created. Please verify your email before signing in.");
+			setFormMessage(body.message || "Account created. Please verify your email (may be in spam) before signing in.");
 			setFullName("");
 			setEmail("");
 			setPassword("");
@@ -64,7 +68,8 @@ export default function RegisterForm() {
 			setSubmitting(false);
 		}
 	};
-
+	// Disable the form while submitting or auth context is loading
+	//Avoid multiple clicks
 	const disabled = submitting || authLoading;
 
 	return (

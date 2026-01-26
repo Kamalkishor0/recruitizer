@@ -117,9 +117,6 @@ export async function getRecruiterAssignedTests(req, res) {
             },
             {
                 $addFields: {
-                    recruiterIdFilled: {
-                        $ifNull: ["$recruiterId", { $arrayElemAt: ["$template.recruiterId", 0] }],
-                    },
                     templateTitle: {
                         $ifNull: [{ $arrayElemAt: ["$template.title", 0] }, "Untitled template"],
                     },
@@ -133,7 +130,7 @@ export async function getRecruiterAssignedTests(req, res) {
             },
             {
                 $match: {
-                    recruiterIdFilled: recruiterObjectId,
+                    recruiterId: recruiterObjectId,
                     status: { $in: statuses },
                 },
             },
@@ -189,10 +186,12 @@ export async function getRecruiterOverview(req, res) {
             return res.status(401).json({ error: "Not authenticated" });
         }
 
-        // Scope metrics to this recruiter. If recruiterId is stored on the assignment, use it; otherwise fall back to template.recruiterId (for older records).
+        // Scope metrics to this recruiter.
         const recruiterObjectId = new mongoose.Types.ObjectId(recruiterId);
         const recruiterAssignments = await AssignedTest.aggregate([
             {
+                //this is work as a left join operation
+                //data of interviewTemplate collection will be added to assignedTest collection in template array
                 $lookup: {
                     from: "interviewtemplates",
                     localField: "interviewTemplate",
@@ -200,14 +199,10 @@ export async function getRecruiterOverview(req, res) {
                     as: "template",
                 },
             },
-            {
-                $addFields: {
-                    recruiterIdFilled: {
-                        $ifNull: ["$recruiterId", { $arrayElemAt: ["$template.recruiterId", 0] }],
-                    },
-                },
-            },
-            { $match: { recruiterIdFilled: recruiterObjectId } },
+            //work as a filter operation, WHERE in sql
+            { $match: { recruiterId: recruiterObjectId } },
+            //select only required fields
+            //id is of assignedTest collection
             { $project: { status: 1, candidateId: 1, _id: 1 } },
         ]);
 
@@ -269,9 +264,6 @@ async function computeTopCandidates(recruiterObjectId, templateObjectId, topLimi
         },
         {
             $addFields: {
-                recruiterIdFilled: {
-                    $ifNull: ["$recruiterId", { $arrayElemAt: ["$template.recruiterId", 0] }],
-                },
                 templateTitle: {
                     $ifNull: [{ $arrayElemAt: ["$template.title", 0] }, "Untitled template"],
                 },
@@ -279,7 +271,7 @@ async function computeTopCandidates(recruiterObjectId, templateObjectId, topLimi
         },
         {
             $match: {
-                recruiterIdFilled: recruiterObjectId,
+                recruiterId: recruiterObjectId,
             },
         },
         {

@@ -4,7 +4,6 @@ import cors from "cors";
 import authRouter from "./routes/auth.js";
 import interviewTemplateRouter from "./routes/interviewTemplate.js";
 import questionsRouter from "./routes/questions.js";
-import scoringRouter from "./routes/scoring.js";
 import candidateRouter from "./routes/candidate.js";
 import recruiterRouter from "./routes/recruiter.js";
 import submissionsRouter from "./routes/submissions.js";
@@ -25,7 +24,6 @@ app.use(cookieParser());
 
 app.use("/auth", authRouter);
 app.use(authenticate);
-app.use("/scoring", authorize("recruiter", "admin"), scoringRouter);
 app.use("/candidates", authorize("candidate"), candidateRouter);
 app.use("/recruiters", authorize("recruiter", "admin"), recruiterRouter);
 app.use("/interview-templates", authorize("recruiter", "admin"), interviewTemplateRouter);

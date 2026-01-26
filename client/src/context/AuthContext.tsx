@@ -2,7 +2,7 @@
 
 import { createContext, useCallback, useContext, useEffect, useState, ReactNode } from "react";
 import { API_BASE } from "@/lib/api";
-
+// Similar to struct in C or class in java
 type User = {
 	_id: string;
 	email: string;
@@ -14,11 +14,12 @@ type AuthContextValue = {
 	user: User | null;
 	loading: boolean;
 	error: string | null;
-	login: (email: string, password: string) => Promise<User | null>;
+	login: (email: string, password: string) => Promise<User | null>;  //Signature of login function
 	logout: () => Promise<void>;
 	refresh: () => Promise<void>;
 };
-
+// context will work only when used within a provider
+// they are not global like redux store but scoped to the provider (lets say a global one for that)
 const AuthContext = createContext<AuthContextValue | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
@@ -26,6 +27,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 	const [loading, setLoading] = useState<boolean>(true);
 	const [error, setError] = useState<string | null>(null);
 
+	// It has runs once when the component is mounted 
+	// Does not have any dependencies so it will not re-run
 	const persistUser = useCallback((nextUser: User | null) => {
 		setUser(nextUser);
 		if (nextUser) {
@@ -35,6 +38,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 		}
 	}, []);
 
+	// It will run whenever the 'persistUser' function changes
+	// It is used to fetch the current user data from the server
 	const refresh = useCallback(async () => {
 		setLoading(true);
 		setError(null);
@@ -45,7 +50,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 				headers.Authorization = `Bearer ${token}`;
 			}
 			const res = await fetch(`${API_BASE}/auth/me`, {
-				credentials: "include",
+				credentials: "include", //By default, fetch does not send cookies cross-origin requests
 				headers,
 			});
 
@@ -131,6 +136,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 	}, [refresh, persistUser]);
 
 	return (
+		// Providing the context value to child components
 		<AuthContext.Provider value={{ user, loading, error, login, logout, refresh }}>
 			{children}
 		</AuthContext.Provider>
@@ -138,6 +144,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 }
 
 export function useAuthContext() {
+	// Custom hook to use the AuthContext
 	const ctx = useContext(AuthContext);
 	if (!ctx) {
 		throw new Error("useAuthContext must be used within an AuthProvider");
