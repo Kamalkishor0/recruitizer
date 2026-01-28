@@ -43,7 +43,7 @@ export default function DashboardSidebar({ active, onChange, user }: DashboardSi
 				},
 				{
 					key: "interviews-completed",
-					label: "Completed / Passed",
+					label: "Completed / Evaluated",
 					description: "Review completed interviews",
 					accent: "from-sky-400/80 to-indigo-500/80",
 				},

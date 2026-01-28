@@ -7,7 +7,7 @@ export type OverviewStats = {
   totalScheduled: number;
   pendingCount: number;
   completedCount: number;
-  candidatesEvaluated: number;
+  evaluatedCount: number;
 };
 
 export function useRecruiterOverview(enabled: boolean) {

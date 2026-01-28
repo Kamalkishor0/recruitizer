@@ -209,39 +209,14 @@ export async function getRecruiterOverview(req, res) {
         const totalScheduled = recruiterAssignments.length;
         const pendingCount = recruiterAssignments.filter((row) => row.status === "pending").length;
         const completedAssignments = recruiterAssignments.filter((row) => row.status === "completed" || row.status === "passed" || row.status === "failed");
+        const evaluatedAssignments = recruiterAssignments.filter((row) => row.status === "passed" || row.status === "failed");
         const completedCount = completedAssignments.length;
-
-        let evaluatedAgg = [];
-        if (recruiterAssignments.length > 0) {
-            const assignedIds = recruiterAssignments.map((row) => row._id);
-            evaluatedAgg = await Submission.aggregate([
-                { $match: { evaluated: true, assignedTestId: { $in: assignedIds } } },
-                { $group: { _id: "$assignedTestId" } },
-                {
-                    $lookup: {
-                        from: "assignedtests",
-                        localField: "_id",
-                        foreignField: "_id",
-                        as: "assigned",
-                    },
-                },
-                { $unwind: "$assigned" },
-                { $group: { _id: "$assigned.candidateId" } },
-            ]);
-        }
-
-        const candidateSet = new Set(completedAssignments.map((row) => String(row.candidateId)));
-        evaluatedAgg.forEach((row) => {
-            if (row?._id) {
-                candidateSet.add(String(row._id));
-            }
-        });
-
+        const evaluatedCount = evaluatedAssignments.length;
         return res.json({
             totalScheduled,
             pendingCount,
             completedCount,
-            candidatesEvaluated: candidateSet.size,
+            evaluatedCount,
         });
     } catch (err) {
         console.error("Failed to load recruiter overview", err);

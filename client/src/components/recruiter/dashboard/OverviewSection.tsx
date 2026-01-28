@@ -15,7 +15,7 @@ export default function OverviewSection({ stats, loading, error, onNavigate }: O
 		{ label: "Total interviews scheduled", value: stats?.totalScheduled, accent: "from-indigo-400/25 via-indigo-300/15 to-slate-900/70" },
 		{ label: "Pending interviews", value: stats?.pendingCount, accent: "from-emerald-400/25 via-emerald-300/15 to-slate-900/70" },
 		{ label: "Completed interviews", value: stats?.completedCount, accent: "from-sky-400/25 via-sky-300/15 to-slate-900/70" },
-		{ label: "Candidates evaluated", value: stats?.candidatesEvaluated, accent: "from-amber-300/25 via-amber-200/15 to-slate-900/70" },
+		{ label: "Interviews evaluated", value: stats?.evaluatedCount, accent: "from-amber-300/25 via-amber-200/15 to-slate-900/70" },
 	];
 
 	return (

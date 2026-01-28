@@ -42,20 +42,22 @@ export default function TopCandidatesSidebar({ assignments, onReload, defaultK =
 	const templateCards = useMemo<TemplateCard[]>(() => {
 		const map = new Map<string, { title: string; completedCount: number; candidateIds: Set<string> }>();
 
-		assignments.forEach((item) => {
-			if (!map.has(item.interviewTemplate)) {
-				map.set(item.interviewTemplate, {
-					title: item.templateTitle,
-					completedCount: 0,
-					candidateIds: new Set<string>(),
-				});
-			}
+		assignments
+			.filter((item) => item.status !== "passed" && item.status !== "failed")
+			.forEach((item) => {
+				if (!map.has(item.interviewTemplate)) {
+					map.set(item.interviewTemplate, {
+						title: item.templateTitle,
+						completedCount: 0,
+						candidateIds: new Set<string>(),
+					});
+				}
 
-			const entry = map.get(item.interviewTemplate);
-			if (!entry) return;
-			entry.completedCount += 1;
-			entry.candidateIds.add(item.candidateId);
-		});
+				const entry = map.get(item.interviewTemplate);
+				if (!entry) return;
+				entry.completedCount += 1;
+				entry.candidateIds.add(item.candidateId);
+			});
 
 		return Array.from(map.entries())
 			.map(([templateId, entry]) => ({
@@ -75,8 +77,6 @@ export default function TopCandidatesSidebar({ assignments, onReload, defaultK =
 	const [topCandidates, setTopCandidates] = useState<TopCandidate[]>([]);
 	const [marking, setMarking] = useState(false);
 	const [actionMessage, setActionMessage] = useState<string | null>(null);
-	const [copyState, setCopyState] = useState<"idle" | "copied" | "error">("idle");
-	const [approvedEmails, setApprovedEmails] = useState<string[]>([]);
 
 	const loadTopCandidates = useCallback(async (templateId: string, limit: number) => {
 		setLoading(true);
@@ -99,20 +99,7 @@ export default function TopCandidatesSidebar({ assignments, onReload, defaultK =
 		}
 	}, []);
 
-	const emailList = useMemo(() => approvedEmails, [approvedEmails]);
 
-	const handleCopyEmails = useCallback(async () => {
-		if (!emailList.length) return;
-		try {
-			await navigator.clipboard.writeText(emailList.join(", "));
-			setCopyState("copied");
-			window.setTimeout(() => setCopyState("idle"), 1500);
-		} catch (err) {
-			console.error("Failed to copy emails", err);
-			setCopyState("error");
-			window.setTimeout(() => setCopyState("idle"), 2000);
-		}
-	}, [emailList]);
 
 	const handleMarkTopPassed = useCallback(async () => {
 		if (!selectedTemplateId) return;
@@ -132,9 +119,8 @@ export default function TopCandidatesSidebar({ assignments, onReload, defaultK =
 			}
 			const nextTop = Array.isArray((payload as { topCandidates?: TopCandidate[] }).topCandidates) ? (payload as { topCandidates: TopCandidate[] }).topCandidates : [];
 			setTopCandidates(nextTop);
-			setApprovedEmails(Array.isArray((payload as { emails?: string[] }).emails) ? ((payload as { emails: string[] }).emails.filter(Boolean)) : []);
 			setActionMessage(`Updated ${Number((payload as { updatedCount?: number }).updatedCount ?? 0)} assignments to passed`);
-			setCopyState("idle");
+			setActionMessage(`Updated ${Number((payload as { updatedCount?: number }).updatedCount ?? 0)} assignments to passed`);
 			onReload?.();
 		} catch (err) {
 			const message = err instanceof Error ? err.message : "Failed to mark top candidates as passed";
@@ -165,8 +151,6 @@ export default function TopCandidatesSidebar({ assignments, onReload, defaultK =
 
 	useEffect(() => {
 		setActionMessage(null);
-		setCopyState("idle");
-		setApprovedEmails([]);
 	}, [selectedTemplateId, k]);
 
 	useEffect(() => {
@@ -195,7 +179,7 @@ export default function TopCandidatesSidebar({ assignments, onReload, defaultK =
 			</div>
 
 			<div className="mt-4 space-y-3">
-				{templateCards.length === 0 && <p className="text-sm text-slate-300">No completed interviews yet.</p>}
+				{templateCards.length === 0 && <p className="text-sm text-slate-300">No template left to evaluate.</p>}
 
 				{templateCards.map((card) => {
 					const isActive = selectedTemplateId === card.templateId;
@@ -290,22 +274,7 @@ export default function TopCandidatesSidebar({ assignments, onReload, defaultK =
 						</button>
 					</div>
 					{actionMessage && <p className="text-xs font-semibold text-emerald-100">{actionMessage}</p>}
-						{emailList.length > 0 && (
-						<div className="space-y-2 rounded-xl border border-white/10 bg-black/30 p-3">
-							<div className="flex items-center justify-between gap-3">
-								<p className="text-xs font-semibold uppercase tracking-[0.12em] text-indigo-200">Emails ({emailList.length})</p>
-								<button
-									onClick={handleCopyEmails}
-										disabled={copyState === "copied" || emailList.length === 0}
-									className="rounded-lg border border-white/15 bg-white/5 px-3 py-1 text-[11px] font-semibold text-white transition hover:border-white/30 hover:bg-white/10 disabled:opacity-70"
-								>
-									{copyState === "copied" ? "Copied" : "Copy emails"}
-								</button>
-							</div>
-							<p className="text-xs leading-relaxed text-slate-100 break-words">{emailList.join(", ")}</p>
-							{copyState === "error" && <p className="text-[11px] text-amber-200">Unable to copy. Select the text above and copy manually.</p>}
-						</div>
-					)}
+
 				</div>
 			</div>
 		</aside>

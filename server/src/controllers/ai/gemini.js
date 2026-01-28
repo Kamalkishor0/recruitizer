@@ -171,6 +171,43 @@ export async function generateGeminiTemplatePreview(req, res) {
       .slice(0, count)
       .map((q, idx) => ({ ...q, id: crypto.randomUUID?.() || `gen-${Date.now()}-${idx}` }));
 
+    // Introduce randomness: shuffle options for multiple-choice questions so
+    // the correct answer isn't always the same option index (models often
+    // bias to a fixed position). We use crypto.randomInt when available.
+    if (testType === "multiple_choice") {
+      const randInt = (max) => {
+        if (typeof crypto.randomInt === "function") {
+          try {
+            return crypto.randomInt(0, max);
+          } catch {
+            return Math.floor(Math.random() * max);
+          }
+        }
+        return Math.floor(Math.random() * max);
+      };
+
+      normalizedQuestions.forEach((q) => {
+        if (!Array.isArray(q.options) || q.options.length <= 1) return;
+        const origOptions = q.options.slice();
+        const origCorrect = Number.isInteger(q.correctOption) ? q.correctOption : 0;
+
+        // Fisher-Yates shuffle
+        const shuffled = origOptions.slice();
+        for (let i = shuffled.length - 1; i > 0; i--) {
+          const j = randInt(i + 1);
+          const tmp = shuffled[i];
+          shuffled[i] = shuffled[j];
+          shuffled[j] = tmp;
+        }
+
+        // Find new index of the originally-correct option
+        const originalAnswer = origOptions[origCorrect];
+        const newIndex = shuffled.findIndex((opt) => opt === originalAnswer);
+        q.options = shuffled;
+        q.correctOption = newIndex >= 0 ? newIndex : 0;
+      });
+    }
+
     if (!normalizedQuestions.length) {
       return res.status(502).json({ error: "Gemini did not return usable questions." });
     }
