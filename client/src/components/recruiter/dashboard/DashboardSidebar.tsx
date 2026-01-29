@@ -80,6 +80,12 @@ export default function DashboardSidebar({ active, onChange, user }: DashboardSi
 					description: "Send templates to candidates",
 					accent: "from-emerald-400/80 to-lime-500/80",
 				},
+				{
+					key: "jobs",
+					label: "Jobs",
+					description: "Post openings",
+					accent: "from-amber-300/80 to-orange-500/80",
+				},
 			],
 		},
 	];

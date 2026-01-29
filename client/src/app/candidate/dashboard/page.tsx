@@ -1,10 +1,12 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { type FormEvent, useCallback, useEffect, useMemo, useState } from "react";
 import CandidateSidebar, { type CandidateTab } from "@/components/candidate/CandidateSidebar";
+import JobsLanding from "@/components/candidate/JobsLanding";
 import { useCandidateAssignments } from "@/hooks/useCandidateAssignments";
 import useAuth from "@/hooks/useAuth";
 import { ASSIGNMENT_STATUS_LABEL, groupAssignmentsByStatus, type AssignmentStatus, type CandidateAssignment } from "@/lib/assignments";
+import { API_BASE } from "@/lib/api";
 import { useRouter, useSearchParams } from "next/navigation";
 
 // Candidate dashboard shell with tabbed sections
@@ -100,6 +102,7 @@ export default function CandidateDashboard() {
 
         <section className="flex-1 space-y-6">
           {activeTab === "jobs" && <JobsLanding />}
+          {activeTab === "resume" && <ResumeUploadSection />}
           {activeTab === "interviews" && (
             <InterviewsOverview
               loading={assignmentsLoading}
@@ -119,25 +122,126 @@ export default function CandidateDashboard() {
   );
 }
 
-function JobsLanding() {
+function ResumeUploadSection() {
+  const [file, setFile] = useState<File | null>(null);
+  const [resume, setResume] = useState<null | { fileName: string; uploadedAt?: string; size?: number }>(null);
+  const [loading, setLoading] = useState(false);
+  const [uploading, setUploading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [success, setSuccess] = useState<string | null>(null);
+
+  const fetchResume = useCallback(async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const res = await fetch(`${API_BASE}/candidates/resume`, { credentials: "include" });
+      if (res.status === 404) {
+        setResume(null);
+        return;
+      }
+      if (!res.ok) {
+        const body = await res.json().catch(() => ({}));
+        throw new Error(body.error || "Failed to load resume");
+      }
+      const data = await res.json();
+      setResume(data?.resume ?? null);
+    } catch (err) {
+      const message = err instanceof Error ? err.message : "Failed to load resume";
+      setError(message);
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    fetchResume();
+  }, [fetchResume]);
+
+  const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    setError(null);
+    setSuccess(null);
+    if (!file) {
+      setError("Please choose a PDF resume to upload.");
+      return;
+    }
+    if (!file.type.includes("pdf")) {
+      setError("Only PDF resumes are supported right now.");
+      return;
+    }
+
+    setUploading(true);
+    try {
+      const formData = new FormData();
+      formData.append("file", file);
+      const res = await fetch(`${API_BASE}/candidates/resume`, {
+        method: "POST",
+        body: formData,
+        credentials: "include",
+      });
+
+      if (!res.ok) {
+        const body = await res.json().catch(() => ({}));
+        throw new Error(body.error || "Failed to upload resume");
+      }
+
+      const data = await res.json();
+      setResume(data?.resume ?? null);
+      setSuccess("Resume uploaded and embedded successfully.");
+    } catch (err) {
+      const message = err instanceof Error ? err.message : "Failed to upload resume";
+      setError(message);
+    } finally {
+      setUploading(false);
+    }
+  };
+
   return (
     <section className="rounded-2xl border border-white/10 bg-white/5 p-6 shadow-lg shadow-indigo-500/10">
-      <p className="text-xs uppercase tracking-[0.2em] text-emerald-200">Jobs landing</p>
-      <h2 className="mt-2 text-2xl font-semibold text-white">Jobs posted by recruiters</h2>
-      <p className="mt-2 inline-flex items-center gap-2 py-1 text-xs font-semibold text-white/80">
-        Coming soon — this section will list open roles as recruiters publish them.
-      </p>
-      {/* <div className="mt-6 grid gap-4 sm:grid-cols-2">
-        {[1, 2, 3, 4].map((idx) => (
-          <div
-            key={idx}
-            className="h-32 rounded-xl border border-dashed border-emerald-200/30 bg-emerald-500/5 p-4 text-sm text-emerald-100/80"
+      <p className="text-xs uppercase tracking-[0.2em] text-fuchsia-200">Resume</p>
+      <h2 className="mt-2 text-2xl font-semibold text-white">Upload your latest resume</h2>
+      <p className="mt-2 text-sm text-slate-200/90">Your resume will be embedded for better job recommendations.</p>
+
+      <form onSubmit={handleSubmit} className="mt-5 space-y-4">
+        <label className="block rounded-xl border border-white/10 bg-white/5 p-4 text-sm text-slate-100/90">
+          <span className="font-semibold text-white">Choose PDF</span>
+          <input
+            type="file"
+            accept="application/pdf"
+            onChange={(e) => setFile(e.target.files?.[0] ?? null)}
+            className="mt-2 block w-full text-xs text-slate-200"
+          />
+        </label>
+
+        <div className="flex flex-wrap items-center gap-3">
+          <button
+            type="submit"
+            disabled={uploading}
+            className="rounded-xl bg-gradient-to-r from-fuchsia-500 to-pink-500 px-4 py-2 text-sm font-semibold text-white shadow-lg shadow-pink-500/20 transition hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-60"
           >
-            <p className="font-semibold text-emerald-100">Upcoming job slot</p>
-            <p className="mt-2 text-emerald-50/70">We will populate recruiter-posted jobs here with role details and apply actions.</p>
-          </div>
-        ))}
-      </div> */}
+            {uploading ? "Uploading..." : "Upload resume"}
+          </button>
+
+          {file && (
+            <span className="text-xs text-slate-200/80">
+              Ready to upload: {file.name} ({Math.round(file.size / 1024)} KB)
+            </span>
+          )}
+        </div>
+      </form>
+
+      {loading && <p className="mt-3 text-sm text-slate-200">Checking your current resume...</p>}
+      {error && <p className="mt-3 text-sm text-rose-200">{error}</p>}
+      {success && <p className="mt-3 text-sm text-emerald-200">{success}</p>}
+
+      {resume && (
+        <div className="mt-5 rounded-xl border border-white/10 bg-white/5 p-4 text-sm text-slate-100">
+          <p className="text-xs uppercase tracking-[0.18em] text-fuchsia-200">Current resume on file</p>
+          <p className="mt-2 text-base font-semibold text-white">{resume.fileName}</p>
+          <p className="text-xs text-slate-300">Uploaded {resume.uploadedAt ? new Date(resume.uploadedAt).toLocaleString() : "recently"}</p>
+          {resume.size && <p className="text-xs text-slate-400">Size: {Math.round(resume.size / 1024)} KB</p>}
+        </div>
+      )}
     </section>
   );
 }

@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 
-export type CandidateTab = "jobs" | "interviews" | "results";
+export type CandidateTab = "jobs" | "interviews" | "results" | "resume";
 
 type CandidateSidebarProps = {
   activeTab: CandidateTab;
@@ -34,6 +34,12 @@ const NAV_ITEMS: NavItem[] = [
     label: "Results",
     description: "Outcomes for completed interviews",
     accent: "from-amber-300/80 to-orange-500/80",
+  },
+  {
+    key: "resume",
+    label: "Resume",
+    description: "Upload your latest CV",
+    accent: "from-fuchsia-400/80 to-pink-500/80",
   },
 ];
 

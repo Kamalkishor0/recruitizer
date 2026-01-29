@@ -5,6 +5,7 @@ export type ActiveTab =
 	| "results-top"
 	| "templates"
 	| "questions"
-	| "assign";
+| "assign"
+	| "jobs";
 
-export const ALLOWED_TABS: ActiveTab[] = ["overview", "interviews-pending", "interviews-completed", "results-top", "templates", "questions", "assign"];
+export const ALLOWED_TABS: ActiveTab[] = ["overview", "interviews-pending", "interviews-completed", "results-top", "templates", "questions", "assign", "jobs"];
