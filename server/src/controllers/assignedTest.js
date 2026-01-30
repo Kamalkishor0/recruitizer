@@ -11,7 +11,7 @@ const clampLimit = (value, min = 1, max = 20) => {
 };
 
 export async function assignedTestToCandidate(req, res) {
-    const { candidateId, candidateEmail, interviewTemplate, status, startTime, endTime, expireAt } = req.body;
+    const { candidateId, candidateEmail, interviewTemplate, status, startTime, endTime, expireAt, force } = req.body;
 
     const normalizedEmail = typeof candidateEmail === "string" ? candidateEmail.trim().toLowerCase() : null;
 
@@ -44,12 +44,11 @@ export async function assignedTestToCandidate(req, res) {
         interviewTemplate,
     });
 
-    if (existing) {
+    if (existing && !force) {
         return res.status(409).json({ error: "Candidate already has this interview assigned", assignedId: existing.assignedId || existing._id });
     }
 
-    const newAssignedTest = await AssignedTest.create({
-        assignedId: new mongoose.Types.ObjectId().toString(),
+    const payload = {
         candidateId: candidate._id,
         interviewTemplate,
         recruiterId: template.recruiterId,
@@ -57,6 +56,30 @@ export async function assignedTestToCandidate(req, res) {
         startTime: startTime ? new Date(startTime) : undefined,
         endTime: endTime ? new Date(endTime) : undefined,
         expiresAt: new Date(expireAt),
+    };
+
+    if (existing && force) {
+        const updated = await AssignedTest.findOneAndUpdate(
+            { _id: existing._id },
+            payload,
+            { new: true },
+        );
+        return res.status(200).json({
+            assignedId: updated.assignedId || updated._id,
+            candidateId: updated.candidateId,
+            interviewTemplate: updated.interviewTemplate,
+            status: updated.status,
+            startTime: updated.startTime,
+            endTime: updated.endTime,
+            expiresAt: updated.expiresAt,
+            createdAt: updated.createdAt,
+            updated: true,
+        });
+    }
+
+    const newAssignedTest = await AssignedTest.create({
+        assignedId: new mongoose.Types.ObjectId().toString(),
+        ...payload,
     });
 
     res.status(201).json({

@@ -58,6 +58,12 @@ export default function DashboardSidebar({ active, onChange, user }: DashboardSi
 					description: "Highlights and scoring",
 					accent: "from-amber-300/80 to-orange-500/80",
 				},
+				{
+					key: "applications",
+					label: "Applications",
+					description: "Per-job submissions",
+					accent: "from-indigo-400/80 to-violet-500/80",
+				},
 			],
 		},
 		{

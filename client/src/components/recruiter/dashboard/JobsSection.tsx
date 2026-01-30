@@ -22,11 +22,20 @@ interface Job {
 	location?: string;
 	workType?: string;
 	seniority?: string;
+	recruiterName?: string;
 	createdAt?: string;
 }
 
 export default function JobsSection() {
-	const [form, setForm] = useState<JobPayload>({ title: "", description: "" });
+	const [form, setForm] = useState<JobPayload>({
+		title: "",
+		description: "",
+		requirements: "",
+		skills: "",
+		location: "",
+		workType: "",
+		seniority: "",
+	});
 	const [submitting, setSubmitting] = useState(false);
 	const [message, setMessage] = useState<string | null>(null);
 	const [error, setError] = useState<string | null>(null);
@@ -202,7 +211,10 @@ export default function JobsSection() {
 				<div className="grid gap-3 md:grid-cols-2">
 					{jobs.map((job) => (
 						<div key={job._id} className="rounded-xl border border-white/10 bg-white/5 p-4 text-sm text-slate-100 shadow-inner shadow-black/15">
-							<p className="text-xs uppercase tracking-[0.16em] text-amber-200">{job.seniority || "Role"}</p>
+							<div className="mb-2 flex items-center justify-between text-xs text-slate-200/90">
+								<p className="rounded-lg bg-white/10 px-2 py-1 font-semibold text-amber-100">{job.recruiterName || "Recruiter"}</p>
+								<p className="uppercase tracking-[0.16em] text-amber-200">{job.seniority || "Role"}</p>
+							</div>
 							<h3 className="text-lg font-semibold text-white">{job.title}</h3>
 							<p className="line-clamp-3 text-slate-200/90">{job.description}</p>
 							{job.workType && <p className="text-xs text-slate-300">Type: {job.workType}</p>}

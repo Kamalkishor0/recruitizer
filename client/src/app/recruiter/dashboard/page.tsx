@@ -13,6 +13,7 @@ import OverviewSection from "@/components/recruiter/dashboard/OverviewSection";
 import PendingAssignmentsSection from "@/components/recruiter/dashboard/PendingAssignmentsSection";
 import CompletedAssignmentsSection from "@/components/recruiter/dashboard/CompletedAssignmentsSection";
 import JobsSection from "@/components/recruiter/dashboard/JobsSection";
+import ApplicationsSection from "@/components/recruiter/dashboard/ApplicationsSection";
 import { ALLOWED_TABS, type ActiveTab } from "./tabs";
 import useAuth from "@/hooks/useAuth";
 import { useRecruiterAssignedTests } from "@/hooks/useRecruiterAssignedTests";
@@ -150,6 +151,8 @@ export default function RecruiterDashboard() {
 							<TopCandidatesSidebar assignments={completedAssignments} onReload={reloadCompleted} />
 						</div>
 					)}
+
+					{active === "applications" && <ApplicationsSection />}
 
 					{active === "templates" && (
 						<TemplatesSidebar

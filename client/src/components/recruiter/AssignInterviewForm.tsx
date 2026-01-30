@@ -21,6 +21,7 @@ export default function AssignInterviewForm({ templates, loading = false, error 
     const [submitting, setSubmitting] = useState(false);
     const [formError, setFormError] = useState<string | null>(null);
     const [successMessage, setSuccessMessage] = useState<string | null>(null);
+    const [forceAssign, setForceAssign] = useState(false);
 
     const sortedTemplates = useMemo(() => [...templates].sort((a, b) => a.title.localeCompare(b.title)), [templates]);
 
@@ -69,17 +70,24 @@ export default function AssignInterviewForm({ templates, loading = false, error 
                     candidateEmail: candidateEmail.trim(),
                     interviewTemplate: selectedTemplateId,
                     expireAt: parsedExpiry.toISOString(),
+                    force: forceAssign,
                 }),
             });
 
             if (!res.ok) {
                 const body = await res.json().catch(() => ({}));
+                if (res.status === 409) {
+                    setForceAssign(true);
+                    setFormError(body.error || "Candidate already has this interview. Click 'Assign anyway' to overwrite.");
+                    return;
+                }
                 throw new Error(body.error || "Failed to assign interview.");
             }
 
             setSuccessMessage("Interview assigned. Pending candidate start.");
             setCandidateEmail("");
             setExpiresAt(toLocalInputValue(new Date(Date.now() + 7 * 24 * 60 * 60 * 1000)));
+            setForceAssign(false);
             onAssigned?.();
         } catch (err) {
             const message = err instanceof Error ? err.message : "Failed to assign interview.";
@@ -153,6 +161,32 @@ export default function AssignInterviewForm({ templates, loading = false, error 
 
                 {formError && <p className="text-sm text-red-400">{formError}</p>}
                 {successMessage && <p className="text-sm text-emerald-300">{successMessage}</p>}
+
+                {forceAssign && formError && (
+                    <div className="rounded-lg border border-amber-300/50 bg-amber-500/10 px-3 py-2 text-sm text-amber-100">
+                        <div className="flex flex-wrap items-center justify-between gap-3">
+                            <div>
+                                <p className="font-semibold">Candidate already has this template.</p>
+                                <p className="text-xs text-amber-50/80">Click "Assign anyway" to overwrite the existing assignment.</p>
+                            </div>
+                            <div className="flex gap-2">
+                                <button
+                                    type="button"
+                                    onClick={() => setForceAssign(false)}
+                                    className="rounded border border-white/30 px-3 py-1 text-xs font-semibold text-white hover:border-white/60"
+                                >
+                                    Cancel
+                                </button>
+                                <button
+                                    type="submit"
+                                    className="rounded border border-emerald-300/50 bg-emerald-500/80 px-3 py-1 text-xs font-semibold text-white hover:border-emerald-200 hover:bg-emerald-500"
+                                >
+                                    Assign anyway
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                )}
 
                 <div className="flex flex-wrap gap-3">
                     <button

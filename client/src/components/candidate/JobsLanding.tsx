@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useState } from "react";
 import { API_BASE } from "@/lib/api";
+import Link from "next/link";
 
 export default function JobsLanding() {
   const [jobs, setJobs] = useState<any[]>([]);
@@ -75,7 +76,10 @@ export default function JobsLanding() {
         {jobs.length === 0 && !loading && <p className="text-sm text-slate-300">No jobs yet.</p>}
         {jobs.map((job) => (
           <div key={job._id} className="rounded-xl border border-white/10 bg-white/5 p-4 text-sm text-slate-100 shadow-inner shadow-black/15">
-            <p className="text-xs uppercase tracking-[0.16em] text-emerald-200">{job.seniority || "Role"}</p>
+            <div className="mb-2 flex items-center justify-between text-xs text-slate-200/90">
+              <p className="rounded-lg bg-white/10 px-2 py-1 font-semibold text-emerald-100">{job.recruiterName || "Recruiter"}</p>
+              <p className="uppercase tracking-[0.16em] text-emerald-200">{job.seniority || "Role"}</p>
+            </div>
             <h3 className="text-lg font-semibold text-white">{job.title}</h3>
             <p className="line-clamp-3 text-slate-200/90">{job.description}</p>
             {typeof job.score === "number" && (
@@ -84,6 +88,20 @@ export default function JobsLanding() {
             {job.workType && <p className="text-xs text-slate-300">Type: {job.workType}</p>}
             {job.location && <p className="text-xs text-slate-300">Location: {job.location}</p>}
             {job.skills?.length ? <p className="text-xs text-slate-300">Skills: {job.skills.join(", ")}</p> : null}
+            <div className="mt-3 flex flex-wrap gap-2">
+              {job.applied ? (
+                <span className="inline-flex items-center rounded-lg border border-emerald-400/60 bg-emerald-500/20 px-3 py-2 text-xs font-semibold text-emerald-100">
+                  Applied
+                </span>
+              ) : (
+                <Link
+                  href={`/candidate/jobs/${job._id}/apply`}
+                  className="inline-flex items-center rounded-lg bg-emerald-500 px-3 py-2 text-xs font-semibold text-white transition hover:bg-emerald-400"
+                >
+                  Apply
+                </Link>
+              )}
+            </div>
           </div>
         ))}
       </div>

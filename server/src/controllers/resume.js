@@ -1,6 +1,7 @@
 import FormData from "form-data";
 import fetch from "node-fetch";
 import Resume from "../models/resume.js";
+import OrigResume from "../models/origresume.js";
 
 const mlServiceBase = process.env.ML_SERVICE_URL || "http://localhost:8001";
 
@@ -15,6 +16,18 @@ export async function uploadResume(req, res) {
     if (!file) {
       return res.status(400).json({ error: "Resume file is required" });
     }
+
+    await OrigResume.findOneAndUpdate(
+      { userId },
+      {
+        userId,
+        fileName: file.originalname,
+        mimeType: file.mimetype,
+        size: file.size,
+        data: file.buffer,
+      },
+      { upsert: true, new: true, setDefaultsOnInsert: true },
+    );
 
     const form = new FormData();
     form.append("file", file.buffer, { filename: file.originalname, contentType: file.mimetype });
@@ -89,5 +102,26 @@ export async function getResume(req, res) {
   } catch (err) {
     console.error("Failed to fetch resume", err);
     return res.status(500).json({ error: "Failed to fetch resume" });
+  }
+}
+
+export async function getResumeFile(req, res) {
+  try {
+    const userId = req.user?._id;
+    if (!userId) {
+      return res.status(401).json({ error: "Unauthorized" });
+    }
+
+    const orig = await OrigResume.findOne({ userId });
+    if (!orig || !orig.data) {
+      return res.status(404).json({ error: "Resume not found" });
+    }
+
+    res.setHeader("Content-Type", orig.mimeType || "application/octet-stream");
+    res.setHeader("Content-Disposition", `inline; filename="${orig.fileName}"`);
+    return res.send(orig.data);
+  } catch (err) {
+    console.error("Failed to fetch resume file", err);
+    return res.status(500).json({ error: "Failed to fetch resume file" });
   }
 }
