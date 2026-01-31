@@ -27,7 +27,7 @@ export default function RecruiterDashboard() {
 	const router = useRouter();
 	const pathname = usePathname();
 	const searchParams = useSearchParams();
-	const { stats, loading: statsLoading, error: statsError, reload: reloadStats } = useRecruiterOverview(!!user);
+	const { stats, loading: statsLoading, reload: reloadStats } = useRecruiterOverview(!!user);
 	const { assignments, loading: assignmentsLoading, error: assignmentsError, reload: reloadAssignments } = useRecruiterAssignedTests({
 		enabled: !!user,
 		statuses: ["pending", "in_progress"],
@@ -64,6 +64,7 @@ export default function RecruiterDashboard() {
 		const tab = searchParams.get("tab");
 		if (!tab) return;
 		if (ALLOWED_TABS.includes(tab as ActiveTab)) {
+			// eslint-disable-next-line react-hooks/set-state-in-effect
 			setActive(tab as ActiveTab);
 		}
 	}, [searchParams]);
@@ -125,7 +126,7 @@ export default function RecruiterDashboard() {
 
 				<section className="flex-1 space-y-6">
 					{active === "overview" && (
-						<OverviewSection stats={stats} loading={statsLoading} error={statsError} onNavigate={handleTabChange} />
+						<OverviewSection stats={stats} loading={statsLoading} onNavigate={handleTabChange} />
 					)}
 
 					{active === "interviews-pending" && (
@@ -171,7 +172,6 @@ export default function RecruiterDashboard() {
 								templates={templates}
 								loading={templatesLoading}
 								error={templatesError}
-								onReloadTemplates={reloadTemplates}
 								onAssigned={handleAssigned}
 							/>
 							<div className="rounded-2xl border border-white/10 bg-slate-950/70 p-6 shadow-inner shadow-indigo-500/10">

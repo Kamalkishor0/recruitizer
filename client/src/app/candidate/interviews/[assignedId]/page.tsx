@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { notFound, useParams, useRouter } from "next/navigation";
 import { useCandidateAssignments } from "@/hooks/useCandidateAssignments";
 import useAuth from "@/hooks/useAuth";
@@ -12,6 +12,7 @@ export default function CandidateInterviewDetailPage() {
   const { user, loading: authLoading, error: authError } = useAuth();
   const router = useRouter();
   const { assignments, loading, error } = useCandidateAssignments(!!user);
+  const [now] = useState(() => Date.now());
 
   const match = useMemo(() => assignments.find((item) => (item.assignedId || item._id) === assignedId), [assignments, assignedId]);
 
@@ -81,7 +82,7 @@ export default function CandidateInterviewDetailPage() {
   const endsAt = match?.endTime ? new Date(match.endTime).toLocaleString() : "";
   const status = match?.status ? ASSIGNMENT_STATUS_LABEL[match.status] ?? match.status : "";
   const expiresAt = match?.expiresAt ? new Date(match.expiresAt) : null;
-  const isExpired = expiresAt ? expiresAt.getTime() < Date.now() : false;
+  const isExpired = expiresAt ? expiresAt.getTime() < now : false;
   const canStart = match.status !== "completed" && !isExpired;
   const startLabel = match.status === "in_progress" ? "Resume interview" : "Start interview";
   const startPath = `/candidate/interviews/${assignedId}/start`;

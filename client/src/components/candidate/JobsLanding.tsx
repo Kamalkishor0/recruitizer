@@ -4,8 +4,21 @@ import { useCallback, useEffect, useState } from "react";
 import { API_BASE } from "@/lib/api";
 import Link from "next/link";
 
+type Job = {
+  _id: string;
+  recruiterName?: string;
+  seniority?: string;
+  title?: string;
+  description?: string;
+  score?: number;
+  workType?: string;
+  location?: string;
+  skills?: string[];
+  applied?: boolean;
+};
+
 export default function JobsLanding() {
-  const [jobs, setJobs] = useState<any[]>([]);
+  const [jobs, setJobs] = useState<Job[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -16,7 +29,7 @@ export default function JobsLanding() {
         throw new Error("Failed to load jobs");
       }
       const data = await res.json();
-      setJobs(data.jobs ?? []);
+      setJobs((data.jobs ?? []) as Job[]);
     } catch (err) {
       const msg = err instanceof Error ? err.message : "Failed to load jobs";
       setError((prev) => prev ?? msg);
@@ -41,7 +54,7 @@ export default function JobsLanding() {
         }
 
         const data = await res.json();
-        const recommendations = (data?.recommendations ?? []).map((item: any) => ({
+        const recommendations = (data?.recommendations ?? []).map((item: { job: Job; score?: number }) => ({
           ...item.job,
           score: item.score,
         }));

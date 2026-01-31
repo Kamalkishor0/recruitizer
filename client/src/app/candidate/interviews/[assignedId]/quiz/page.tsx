@@ -198,6 +198,7 @@ export default function QuizWorkspacePage() {
     if (timeUp && !submitted) {
       void handleSubmit("time_up");
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [timeUp, submitted]);
 
   if (authLoading) {

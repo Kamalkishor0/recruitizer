@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { formatAssignmentDate, getStatusTone } from "./assignmentHelpers";
+import { getStatusTone } from "./assignmentHelpers";
 import type { RecruiterAssignment } from "@/hooks/useRecruiterAssignedTests";
 
 type CompletedAssignmentsSectionProps = {
@@ -30,6 +30,7 @@ export default function CompletedAssignmentsSection({ assignments, loading, erro
 
 	useEffect(() => {
 		if (selectedTemplate && !groupedAssignments[selectedTemplate]) {
+			// eslint-disable-next-line react-hooks/set-state-in-effect
 			setSelectedTemplate(null);
 		}
 	}, [groupedAssignments, selectedTemplate]);

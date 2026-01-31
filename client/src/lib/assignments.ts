@@ -53,5 +53,3 @@ export const groupAssignmentsByStatus = (assignments: CandidateAssignment[]) => 
     },
   );
 };
-
-export const formatStatusLabel = (status: AssignmentStatus) => ASSIGNMENT_STATUS_LABEL[status] ?? status;

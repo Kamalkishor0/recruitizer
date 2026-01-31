@@ -6,11 +6,10 @@ import type { OverviewStats } from "@/hooks/useRecruiterOverview";
 type OverviewSectionProps = {
 	stats: OverviewStats | null;
 	loading: boolean;
-	error: string | null;
 	onNavigate: (tab: ActiveTab) => void;
 };
 
-export default function OverviewSection({ stats, loading, error, onNavigate }: OverviewSectionProps) {
+export default function OverviewSection({ stats, loading, onNavigate }: OverviewSectionProps) {
 	const cards: { label: string; value: number | string | undefined; accent: string }[] = [
 		{ label: "Total interviews scheduled", value: stats?.totalScheduled, accent: "from-indigo-400/25 via-indigo-300/15 to-slate-900/70" },
 		{ label: "Pending interviews", value: stats?.pendingCount, accent: "from-emerald-400/25 via-emerald-300/15 to-slate-900/70" },

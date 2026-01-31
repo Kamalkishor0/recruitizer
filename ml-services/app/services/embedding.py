@@ -3,7 +3,6 @@ from __future__ import annotations
 from typing import Iterable, List, Sequence
 
 import numpy as np
-import torch
 from sentence_transformers import SentenceTransformer
 
 from app.core.config import get_settings

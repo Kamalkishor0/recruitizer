@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { API_BASE } from "@/lib/api";
 
 export type MCQQuestion = {
@@ -26,14 +26,28 @@ export type NewMCQQuestion = {
   marks?: number;
 };
 
-const mapQuestion = (item: any): MCQQuestion => ({
+type QuestionApiShape = {
+  _id?: string;
+  id?: string;
+  prompt?: string;
+  description?: string;
+  options?: unknown;
+  correctOption?: unknown;
+  difficulty?: "easy" | "medium" | "hard";
+  tags?: unknown;
+  marks?: unknown;
+  createdAt?: string;
+  updatedAt?: string;
+};
+
+const mapQuestion = (item: QuestionApiShape): MCQQuestion => ({
   id: item._id ?? item.id ?? crypto.randomUUID(),
-  prompt: item.prompt,
+  prompt: item.prompt ?? "Untitled question",
   description: item.description,
-  options: item.options || [],
-  correctOption: item.correctOption ?? 0,
+  options: Array.isArray(item.options) ? item.options.map(String) : [],
+  correctOption: typeof item.correctOption === "number" ? item.correctOption : 0,
   difficulty: item.difficulty,
-  tags: item.tags || [],
+  tags: Array.isArray(item.tags) ? item.tags.map(String) : [],
   marks: typeof item.marks === "number" ? item.marks : 1,
   createdAt: item.createdAt,
   updatedAt: item.updatedAt,
@@ -58,7 +72,7 @@ export function useQuestions(enabled: boolean, testType: "multiple_choice" = "mu
         const body = await res.json().catch(() => ({}));
         throw new Error(body.error || "Failed to load questions.");
       }
-      const data = (await res.json()) as any[];
+      const data = (await res.json()) as QuestionApiShape[];
       setQuestions(data.map(mapQuestion));
     } catch (err) {
       const message = err instanceof Error ? err.message : "Failed to load questions.";

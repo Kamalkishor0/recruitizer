@@ -29,6 +29,7 @@ export default function PendingAssignmentsSection({ assignments, loading, error 
 
 	useEffect(() => {
 		if (selectedTemplate && !groupedAssignments[selectedTemplate]) {
+			// eslint-disable-next-line react-hooks/set-state-in-effect
 			setSelectedTemplate(null);
 		}
 	}, [groupedAssignments, selectedTemplate]);

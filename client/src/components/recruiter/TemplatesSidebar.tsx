@@ -41,6 +41,7 @@ export default function TemplatesSidebar({ templates, loading, error, onReload, 
 
 	useEffect(() => {
 		if (!sortedTemplates.length) {
+			// eslint-disable-next-line react-hooks/set-state-in-effect
 			setSelectedId(null);
 			return;
 		}

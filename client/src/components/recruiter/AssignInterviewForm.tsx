@@ -8,13 +8,12 @@ export type AssignInterviewFormProps = {
     templates: RecruiterTemplate[];
     loading?: boolean;
     error?: string | null;
-    onReloadTemplates?: () => void;
     onAssigned?: () => void;
 };
 
 const toLocalInputValue = (date: Date) => date.toISOString().slice(0, 16);
 
-export default function AssignInterviewForm({ templates, loading = false, error = null, onReloadTemplates, onAssigned }: AssignInterviewFormProps) {
+export default function AssignInterviewForm({ templates, loading = false, error = null, onAssigned }: AssignInterviewFormProps) {
     const [candidateEmail, setCandidateEmail] = useState("");
     const [selectedTemplateId, setSelectedTemplateId] = useState<string>("");
     const [expiresAt, setExpiresAt] = useState<string>(() => toLocalInputValue(new Date(Date.now() + 7 * 24 * 60 * 60 * 1000)));
@@ -78,7 +77,7 @@ export default function AssignInterviewForm({ templates, loading = false, error 
                 const body = await res.json().catch(() => ({}));
                 if (res.status === 409) {
                     setForceAssign(true);
-                    setFormError(body.error || "Candidate already has this interview. Click 'Assign anyway' to overwrite.");
+                    setFormError(body.error || "Candidate already has this interview. Click ‘Assign anyway’ to overwrite.");
                     return;
                 }
                 throw new Error(body.error || "Failed to assign interview.");
@@ -167,7 +166,7 @@ export default function AssignInterviewForm({ templates, loading = false, error 
                         <div className="flex flex-wrap items-center justify-between gap-3">
                             <div>
                                 <p className="font-semibold">Candidate already has this template.</p>
-                                <p className="text-xs text-amber-50/80">Click "Assign anyway" to overwrite the existing assignment.</p>
+                                <p className="text-xs text-amber-50/80">Click &quot;Assign anyway&quot; to overwrite the existing assignment.</p>
                             </div>
                             <div className="flex gap-2">
                                 <button

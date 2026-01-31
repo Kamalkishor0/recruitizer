@@ -2,7 +2,7 @@
 
 import { FormEvent, useMemo, useState } from "react";
 import { API_BASE } from "@/lib/api";
-import type { RecruiterTemplate, TemplateQuestion } from "@/hooks/useRecruiterTemplates";
+import type { TemplateQuestion } from "@/hooks/useRecruiterTemplates";
 
 type GeneratedTemplate = {
 	title: string;
