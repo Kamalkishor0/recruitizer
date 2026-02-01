@@ -58,7 +58,7 @@ export default function StartInterviewPage() {
   const expiresAt = assignment?.expiresAt ? new Date(assignment.expiresAt) : null;
   const isExpired = expiresAt ? expiresAt.getTime() < Date.now() : false;
   const statusLabel = assignment?.status ? ASSIGNMENT_STATUS_LABEL[assignment.status] ?? assignment.status : "Scheduled";
-  const templateTitle = assignment?.interviewTemplate?.title || "Untitled template";
+  const jobTitle = assignment?.jobTitle || "Assigned role";
   const testType = assignment?.interviewTemplate?.testType || "multiple_choice";
   const timeLimit = assignment?.interviewTemplate?.timeLimit;
   const isFinished = assignment?.status === "completed" || assignment?.status === "passed" || assignment?.status === "failed";
@@ -156,7 +156,7 @@ export default function StartInterviewPage() {
     <div className="min-h-screen bg-linear-to-br from-slate-900 via-slate-950 to-black text-white">
       <header className="mx-auto flex max-w-4xl flex-col gap-2 px-6 pb-6 pt-8">
         <p className="text-xs uppercase tracking-[0.2em] text-indigo-200">Interview start</p>
-        <h1 className="text-3xl font-semibold">{templateTitle}</h1>
+        <h1 className="text-3xl font-semibold">{jobTitle}</h1>
         <p className="text-sm text-slate-300">Status: {statusLabel}</p>
       </header>
 
@@ -170,6 +170,9 @@ export default function StartInterviewPage() {
         <section className="space-y-4 rounded-2xl border border-white/10 bg-white/5 p-6 shadow-inner shadow-indigo-500/10">
           <div className="flex flex-wrap gap-3 text-xs text-slate-200">
             <span className="rounded-full border border-white/10 bg-white/5 px-3 py-1 capitalize">Type: {testType}</span>
+            {assignment?.jobWorkType && <span className="rounded-full border border-white/10 bg-white/5 px-3 py-1">{assignment.jobWorkType}</span>}
+            {assignment?.jobLocation && <span className="rounded-full border border-white/10 bg-white/5 px-3 py-1">{assignment.jobLocation}</span>}
+            {assignment?.jobSeniority && <span className="rounded-full border border-white/10 bg-white/5 px-3 py-1">{assignment.jobSeniority}</span>}
             {timeLimit ? <span className="rounded-full border border-white/10 bg-white/5 px-3 py-1">Time limit: {timeLimit} min</span> : null}
             {expiresAt ? <span className="rounded-full border border-white/10 bg-white/5 px-3 py-1">Expires {expiresAt.toLocaleString()}</span> : null}
           </div>

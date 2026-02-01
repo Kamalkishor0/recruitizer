@@ -7,6 +7,11 @@ export type CandidateAssignment = {
   expiresAt?: string;
   createdAt: string;
   updatedAt?: string;
+  jobId?: string;
+  jobTitle?: string;
+  jobLocation?: string;
+  jobWorkType?: string;
+  jobSeniority?: string;
   interviewTemplate?: {
     _id: string;
     title?: string;

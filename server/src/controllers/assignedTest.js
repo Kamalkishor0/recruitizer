@@ -3,6 +3,8 @@ import { AssignedTest } from "../models/assignedTest.js";
 import { Submission } from "../models/submission.js";
 import { InterviewTemplate } from "../models/interviewTemplate.js";
 import { User } from "../models/user.js";
+import JobsApplied from "../models/jobsApplied.js";
+import Job from "../models/job.js";
 
 const clampLimit = (value, min = 1, max = 20) => {
     const numeric = Number(value);
@@ -100,7 +102,47 @@ export async function getAssignedTestsForCandidate(req, res) {
         return res.status(401).json({ error: "Not authenticated" });
     }
     const assignedTests = await AssignedTest.find({ candidateId }).populate('interviewTemplate').sort({ createdAt: -1 });
-    res.json(assignedTests);
+
+    // Try to attach job metadata for passed/failed views using the candidate's applications with the same recruiters.
+    const recruiterIds = [...new Set(assignedTests.map((row) => row.recruiterId?.toString()).filter(Boolean))];
+    let appsByRecruiter = new Map();
+    let jobById = new Map();
+
+    if (recruiterIds.length) {
+        const applications = await JobsApplied.find({ userId: candidateId, recruiterId: { $in: recruiterIds.map((id) => new mongoose.Types.ObjectId(id)) } })
+            .sort({ createdAt: -1 })
+            .lean();
+
+        // Keep the most recent application per recruiter.
+        appsByRecruiter = applications.reduce((acc, app) => {
+            const key = app.recruiterId?.toString();
+            if (key && !acc.has(key)) acc.set(key, app);
+            return acc;
+        }, new Map());
+
+        const jobIds = applications.map((app) => app.jobId).filter(Boolean);
+        if (jobIds.length) {
+            const jobs = await Job.find({ _id: { $in: jobIds } }, { title: 1, location: 1, workType: 1, seniority: 1 }).lean();
+            jobById = new Map(jobs.map((job) => [job._id.toString(), job]));
+        }
+    }
+
+    const payload = assignedTests.map((doc) => {
+        const obj = doc.toObject();
+        const recruiterKey = doc.recruiterId?.toString();
+        const application = recruiterKey ? appsByRecruiter.get(recruiterKey) : null;
+        if (application) {
+            const job = application.jobId ? jobById.get(application.jobId.toString()) : null;
+            obj.jobId = application.jobId;
+            obj.jobTitle = application.jobTitle || job?.title;
+            obj.jobLocation = job?.location;
+            obj.jobWorkType = job?.workType;
+            obj.jobSeniority = job?.seniority;
+        }
+        return obj;
+    });
+
+    res.json(payload);
 }
 
 // Detailed list of assigned tests for a recruiter (execution tracking)

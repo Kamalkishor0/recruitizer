@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { API_BASE } from "@/lib/api";
 
 interface JobPayload {
@@ -41,6 +41,8 @@ export default function JobsSection() {
 	const [error, setError] = useState<string | null>(null);
 	const [jobs, setJobs] = useState<Job[]>([]);
 	const [loadingJobs, setLoadingJobs] = useState(false);
+	const [page, setPage] = useState(1);
+	const pageSize = 6;
 
 	const loadJobs = async () => {
 		setLoadingJobs(true);
@@ -61,6 +63,17 @@ export default function JobsSection() {
 	useEffect(() => {
 		loadJobs();
 	}, []);
+
+	useEffect(() => {
+		setPage(1);
+	}, [jobs.length]);
+
+	const totalPages = useMemo(() => (jobs.length === 0 ? 1 : Math.ceil(jobs.length / pageSize)), [jobs.length, pageSize]);
+	const currentPage = Math.min(page, totalPages);
+	const visibleJobs = useMemo(() => {
+		const start = (currentPage - 1) * pageSize;
+		return jobs.slice(start, start + pageSize);
+	}, [currentPage, jobs, pageSize]);
 
 	const handleSubmit = async (e: React.FormEvent) => {
 		e.preventDefault();
@@ -93,7 +106,7 @@ export default function JobsSection() {
 				throw new Error(body.error || "Failed to create job");
 			}
 
-			setMessage("Job posted and embedded successfully.");
+			setMessage("Job posted successfully.");
 			setForm({ title: "", description: "", requirements: "", skills: "", location: "", workType: "", seniority: "" });
 			loadJobs();
 		} catch (err) {
@@ -209,7 +222,7 @@ export default function JobsSection() {
 				</div>
 				{jobs.length === 0 && !loadingJobs && <p className="text-sm text-slate-300">No jobs posted yet.</p>}
 				<div className="grid gap-3 md:grid-cols-2">
-					{jobs.map((job) => (
+					{visibleJobs.map((job) => (
 						<div key={job._id} className="rounded-xl border border-white/10 bg-white/5 p-4 text-sm text-slate-100 shadow-inner shadow-black/15">
 							<div className="mb-2 flex items-center justify-between text-xs text-slate-200/90">
 								<p className="rounded-lg bg-white/10 px-2 py-1 font-semibold text-amber-100">{job.recruiterName || "Recruiter"}</p>
@@ -226,6 +239,33 @@ export default function JobsSection() {
 						</div>
 					))}
 				</div>
+				{jobs.length > 0 && totalPages > 1 && (
+					<div className="flex flex-wrap items-center justify-between gap-3 text-sm text-slate-200">
+						<div className="flex items-center gap-2">
+							<button
+								type="button"
+								className="rounded-lg border border-white/10 bg-white/5 px-3 py-2 font-semibold text-white transition hover:border-white/20 disabled:cursor-not-allowed disabled:opacity-60"
+								onClick={() => setPage((prev) => Math.max(1, prev - 1))}
+								disabled={currentPage === 1}
+							>
+								Previous
+							</button>
+							<button
+								type="button"
+								className="rounded-lg border border-white/10 bg-white/5 px-3 py-2 font-semibold text-white transition hover:border-white/20 disabled:cursor-not-allowed disabled:opacity-60"
+								onClick={() => setPage((prev) => Math.min(totalPages, prev + 1))}
+								disabled={currentPage === totalPages}
+							>
+								Next
+							</button>
+						</div>
+						<div className="flex items-center gap-2">
+							<p className="rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-sm text-white">
+								{currentPage} of {totalPages}
+							</p>
+						</div>
+					</div>
+				)}
 			</div>
 		</section>
 	);

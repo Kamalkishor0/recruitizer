@@ -1,12 +1,12 @@
 "use client";
 
-import { type FormEvent, useCallback, useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import CandidateSidebar, { type CandidateTab } from "@/components/candidate/CandidateSidebar";
 import JobsLanding from "@/components/candidate/JobsLanding";
+import ResumeUploadSection from "@/components/candidate/ResumeUploadSection";
 import { useCandidateAssignments } from "@/hooks/useCandidateAssignments";
 import useAuth from "@/hooks/useAuth";
 import { ASSIGNMENT_STATUS_LABEL, groupAssignmentsByStatus, type AssignmentStatus, type CandidateAssignment } from "@/lib/assignments";
-import { API_BASE } from "@/lib/api";
 import { useRouter, useSearchParams } from "next/navigation";
 
 // Candidate dashboard shell with tabbed sections
@@ -73,7 +73,7 @@ export default function CandidateDashboard() {
         <div>
           <p className="text-xs uppercase tracking-[0.2em] text-indigo-200">Welcome back</p>
           <h1 className="text-3xl font-semibold leading-tight text-white">Candidate dashboard</h1>
-          <p className="text-sm text-slate-300">Use the sidebar to jump between jobs, scheduled interviews, and results.</p>
+          <p className="text-sm text-slate-300">Your one stop solution for job hunting and interview management.</p>
         </div>
         <div className="flex items-center gap-3 px-4 py-3 text-sm text-slate-200">
           <div>
@@ -119,130 +119,6 @@ export default function CandidateDashboard() {
         </section>
       </main>
     </div>
-  );
-}
-
-function ResumeUploadSection() {
-  const [file, setFile] = useState<File | null>(null);
-  const [resume, setResume] = useState<null | { fileName: string; uploadedAt?: string; size?: number }>(null);
-  const [loading, setLoading] = useState(false);
-  const [uploading, setUploading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [success, setSuccess] = useState<string | null>(null);
-
-  const fetchResume = useCallback(async () => {
-    setLoading(true);
-    setError(null);
-    try {
-      const res = await fetch(`${API_BASE}/candidates/resume`, { credentials: "include" });
-      if (res.status === 404) {
-        setResume(null);
-        return;
-      }
-      if (!res.ok) {
-        const body = await res.json().catch(() => ({}));
-        throw new Error(body.error || "Failed to load resume");
-      }
-      const data = await res.json();
-      setResume(data?.resume ?? null);
-    } catch (err) {
-      const message = err instanceof Error ? err.message : "Failed to load resume";
-      setError(message);
-    } finally {
-      setLoading(false);
-    }
-  }, []);
-
-  useEffect(() => {
-    fetchResume();
-  }, [fetchResume]);
-
-  const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-    setError(null);
-    setSuccess(null);
-    if (!file) {
-      setError("Please choose a PDF resume to upload.");
-      return;
-    }
-    if (!file.type.includes("pdf")) {
-      setError("Only PDF resumes are supported right now.");
-      return;
-    }
-
-    setUploading(true);
-    try {
-      const formData = new FormData();
-      formData.append("file", file);
-      const res = await fetch(`${API_BASE}/candidates/resume`, {
-        method: "POST",
-        body: formData,
-        credentials: "include",
-      });
-
-      if (!res.ok) {
-        const body = await res.json().catch(() => ({}));
-        throw new Error(body.error || "Failed to upload resume");
-      }
-
-      const data = await res.json();
-      setResume(data?.resume ?? null);
-      setSuccess("Resume uploaded and embedded successfully.");
-    } catch (err) {
-      const message = err instanceof Error ? err.message : "Failed to upload resume";
-      setError(message);
-    } finally {
-      setUploading(false);
-    }
-  };
-
-  return (
-    <section className="rounded-2xl border border-white/10 bg-white/5 p-6 shadow-lg shadow-indigo-500/10">
-      <p className="text-xs uppercase tracking-[0.2em] text-fuchsia-200">Resume</p>
-      <h2 className="mt-2 text-2xl font-semibold text-white">Upload your latest resume</h2>
-      <p className="mt-2 text-sm text-slate-200/90">Your resume will be embedded for better job recommendations.</p>
-
-      <form onSubmit={handleSubmit} className="mt-5 space-y-4">
-        <label className="block rounded-xl border border-white/10 bg-white/5 p-4 text-sm text-slate-100/90">
-          <span className="font-semibold text-white">Choose PDF</span>
-          <input
-            type="file"
-            accept="application/pdf"
-            onChange={(e) => setFile(e.target.files?.[0] ?? null)}
-            className="mt-2 block w-full text-xs text-slate-200"
-          />
-        </label>
-
-        <div className="flex flex-wrap items-center gap-3">
-          <button
-            type="submit"
-            disabled={uploading}
-            className="rounded-xl bg-gradient-to-r from-fuchsia-500 to-pink-500 px-4 py-2 text-sm font-semibold text-white shadow-lg shadow-pink-500/20 transition hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-60"
-          >
-            {uploading ? "Uploading..." : "Upload resume"}
-          </button>
-
-          {file && (
-            <span className="text-xs text-slate-200/80">
-              Ready to upload: {file.name} ({Math.round(file.size / 1024)} KB)
-            </span>
-          )}
-        </div>
-      </form>
-
-      {loading && <p className="mt-3 text-sm text-slate-200">Checking your current resume...</p>}
-      {error && <p className="mt-3 text-sm text-rose-200">{error}</p>}
-      {success && <p className="mt-3 text-sm text-emerald-200">{success}</p>}
-
-      {resume && (
-        <div className="mt-5 rounded-xl border border-white/10 bg-white/5 p-4 text-sm text-slate-100">
-          <p className="text-xs uppercase tracking-[0.18em] text-fuchsia-200">Current resume on file</p>
-          <p className="mt-2 text-base font-semibold text-white">{resume.fileName}</p>
-          <p className="text-xs text-slate-300">Uploaded {resume.uploadedAt ? new Date(resume.uploadedAt).toLocaleString() : "recently"}</p>
-          {resume.size && <p className="text-xs text-slate-400">Size: {Math.round(resume.size / 1024)} KB</p>}
-        </div>
-      )}
-    </section>
   );
 }
 
@@ -414,9 +290,8 @@ function StatusDetail({ status, assignments, loading, onBack, onOpenAssignment }
 
       <div className="grid gap-3 sm:grid-cols-2">
         {assignments.map((item) => {
-          const title = item.interviewTemplate?.title || "Untitled template";
+          const title = item.jobTitle || "Assigned role";
           const assignedId = item.assignedId || item._id || "";
-          const created = item.createdAt ? new Date(item.createdAt).toLocaleString() : "";
           const expires = item.expiresAt ? new Date(item.expiresAt).toLocaleDateString() : null;
           return (
             <div
@@ -426,15 +301,16 @@ function StatusDetail({ status, assignments, loading, onBack, onOpenAssignment }
               <div className="flex items-start justify-between gap-3">
                 <div>
                   <p className="text-sm font-semibold text-white">{title}</p>
-                  <p className="text-xs text-slate-300">Created {created}</p>
                 </div>
                 <span className="rounded-full border border-white/15 bg-white/10 px-3 py-1 text-xs font-semibold text-white/90">
                   {ASSIGNMENT_STATUS_LABEL[item.status]}
                 </span>
               </div>
               <div className="flex flex-wrap items-center mt-3 gap-2 text-xs text-slate-200">
+                {item.jobWorkType && <span className="rounded-full border border-white/10 bg-white/5 px-3 py-1">{item.jobWorkType}</span>}
+                {item.jobLocation && <span className="rounded-full border border-white/10 bg-white/5 px-3 py-1">{item.jobLocation}</span>}
+                {item.jobSeniority && <span className="rounded-full border border-white/10 bg-white/5 px-3 py-1">{item.jobSeniority}</span>}
                 {expires && <span className="rounded-full border border-white/10 bg-white/5 px-3 py-1">Expires {expires}</span>}
-                {item.startTime && <span className="rounded-full border border-white/10 bg-white/5 px-3 py-1">Starts {new Date(item.startTime).toLocaleString()}</span>}
               </div>
               <div className="flex mt-3">
                 <button
@@ -455,8 +331,21 @@ function StatusDetail({ status, assignments, loading, onBack, onOpenAssignment }
 
 function ResultsOverview({ assignments, loading, error }: { assignments: CandidateAssignment[]; loading: boolean; error: string | null }) {
   const [tab, setTab] = useState<"passed" | "failed">("passed");
+  const [page, setPage] = useState(1);
+  const pageSize = 6;
 
   const filtered = useMemo(() => assignments.filter((item) => item.status === tab), [assignments, tab]);
+
+  useEffect(() => {
+    setPage(1);
+  }, [tab, filtered.length]);
+
+  const totalPages = useMemo(() => (filtered.length === 0 ? 1 : Math.ceil(filtered.length / pageSize)), [filtered.length, pageSize]);
+  const currentPage = Math.min(page, totalPages);
+  const visibleResults = useMemo(() => {
+    const start = (currentPage - 1) * pageSize;
+    return filtered.slice(start, start + pageSize);
+  }, [currentPage, filtered, pageSize]);
 
   return (
     <section className="space-y-4">
@@ -491,15 +380,19 @@ function ResultsOverview({ assignments, loading, error }: { assignments: Candida
       {!loading && filtered.length === 0 && <div className="rounded-xl border border-white/10 bg-white/5 px-4 py-4 text-sm text-slate-300">No {tab} interviews yet.</div>}
 
       <div className="grid gap-4 sm:grid-cols-2">
-        {filtered.map((item) => {
-          const title = item.interviewTemplate?.title || "Untitled template";
+        {visibleResults.map((item) => {
+          const title = item.jobTitle || "Job opportunity";
           const decidedAt = item.updatedAt ? new Date(item.updatedAt).toLocaleString() : item.createdAt ? new Date(item.createdAt).toLocaleString() : "";
           return (
             <div key={item.assignedId || item._id} className="rounded-2xl border border-white/10 bg-white/5 p-5 shadow-inner shadow-black/10">
               <p className="text-xs uppercase tracking-[0.16em] text-indigo-200">{tab === "passed" ? "Passed" : "Failed"}</p>
               <h3 className="mt-1 text-lg font-semibold text-white">{title}</h3>
-              <p className="text-sm text-slate-200">Decision posted {decidedAt || "recently"}</p>
-              {item.interviewTemplate?.description && <p className="mt-2 text-sm text-slate-300 line-clamp-3">{item.interviewTemplate.description}</p>}
+              <p className="text-sm text-slate-200">Decision posted</p>
+              <div className="mt-2 flex flex-wrap gap-2 text-xs text-slate-200">
+                {item.jobWorkType && <span className="rounded-full border border-white/10 bg-white/5 px-3 py-1">{item.jobWorkType}</span>}
+                {item.jobLocation && <span className="rounded-full border border-white/10 bg-white/5 px-3 py-1">{item.jobLocation}</span>}
+                {item.jobSeniority && <span className="rounded-full border border-white/10 bg-white/5 px-3 py-1">{item.jobSeniority}</span>}
+              </div>
               <div className="mt-3 inline-flex rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs font-semibold text-white">
                 Status: {tab === "passed" ? "Passed" : "Failed"}
               </div>
@@ -508,6 +401,34 @@ function ResultsOverview({ assignments, loading, error }: { assignments: Candida
           );
         })}
       </div>
+
+      {filtered.length > 0 && totalPages > 1 && (
+        <div className="flex flex-wrap items-center justify-between gap-3 text-sm text-slate-200">
+          <div className="flex items-center gap-2">
+            <button
+              type="button"
+              className="rounded-lg border border-white/10 bg-white/5 px-3 py-2 font-semibold text-white transition hover:border-white/20 disabled:cursor-not-allowed disabled:opacity-60"
+              onClick={() => setPage((prev) => Math.max(1, prev - 1))}
+              disabled={currentPage === 1}
+            >
+              Previous
+            </button>
+            <button
+              type="button"
+              className="rounded-lg border border-white/10 bg-white/5 px-3 py-2 font-semibold text-white transition hover:border-white/20 disabled:cursor-not-allowed disabled:opacity-60"
+              onClick={() => setPage((prev) => Math.min(totalPages, prev + 1))}
+              disabled={currentPage === totalPages}
+            >
+              Next
+            </button>
+          </div>
+          <div className="flex items-center gap-2">
+            <p className="rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-sm text-white">
+              {currentPage} of {totalPages}
+            </p>
+          </div>
+        </div>
+      )}
     </section>
   );
 }

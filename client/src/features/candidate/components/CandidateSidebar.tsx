@@ -20,7 +20,7 @@ const NAV_ITEMS: NavItem[] = [
   {
     key: "jobs",
     label: "Jobs",
-    description: "Roles posted by recruiters (landing)",
+    description: "Roles posted by recruiters",
     accent: "from-emerald-400/80 to-teal-500/80",
   },
   {

@@ -17,6 +17,14 @@ export async function uploadResume(req, res) {
       return res.status(400).json({ error: "Resume file is required" });
     }
 
+    const allowedMimeTypes = ["application/pdf", "application/vnd.openxmlformats-officedocument.wordprocessingml.document"];
+    const isAllowedMime = allowedMimeTypes.includes(file.mimetype);
+    const hasAllowedExtension = file.originalname?.toLowerCase().endsWith(".pdf") || file.originalname?.toLowerCase().endsWith(".docx");
+
+    if (!isAllowedMime || !hasAllowedExtension) {
+      return res.status(400).json({ error: "Only PDF or DOCX resumes are allowed. Please reupload a PDF or DOCX file." });
+    }
+
     await OrigResume.findOneAndUpdate(
       { userId },
       {

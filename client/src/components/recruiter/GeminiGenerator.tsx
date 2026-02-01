@@ -28,7 +28,7 @@ export default function GeminiGenerator({ onTemplateCreated }: GeminiGeneratorPr
 	};
 
 	const [apiKey, setApiKey] = useState("");
-	const [role, setRole] = useState("Frontend Engineer");
+	const [role, setRole] = useState("");
 	const [questionCount, setQuestionCount] = useState(5);
 	const [questionCountInput, setQuestionCountInput] = useState("5");
 	const [difficulty, setDifficulty] = useState<"easy" | "medium" | "hard">("medium");

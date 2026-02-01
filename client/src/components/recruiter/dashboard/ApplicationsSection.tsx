@@ -30,9 +30,8 @@ export default function ApplicationsSection() {
   const [applications, setApplications] = useState<Application[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [expandedId, setExpandedId] = useState<string | null>(null);
   const [selectedJobId, setSelectedJobId] = useState<string | null>(null);
-  const [recommendations, setRecommendations] = useState<Record<string, Array<{ applicationId: string; candidateId?: string; candidateName?: string; candidateEmail?: string; score: number; submittedAt?: string }>>>({});
+  const [recommendations, setRecommendations] = useState<Record<string, Array<{ applicationId: string; candidateId?: string; candidateName?: string; candidateEmail?: string; submittedAt?: string }>>>({});
   const [recLoading, setRecLoading] = useState<Record<string, boolean>>({});
   const [recError, setRecError] = useState<Record<string, string | null>>({});
   const [topKByJob, setTopKByJob] = useState<Record<string, number>>({});
@@ -116,7 +115,7 @@ export default function ApplicationsSection() {
       const body = await res.json();
       const recs = body.recommendations || [];
       setRecommendations((prev) => ({ ...prev, [jobId]: recs }));
-      return recs as Array<{ applicationId: string; candidateId?: string; candidateName?: string; candidateEmail?: string; score: number; submittedAt?: string }>;
+      return recs as Array<{ applicationId: string; candidateId?: string; candidateName?: string; candidateEmail?: string; submittedAt?: string }>;
     } catch (err) {
       const msg = err instanceof Error ? err.message : "Failed to load recommendations";
       setRecError((prev) => ({ ...prev, [jobId]: msg }));
@@ -256,7 +255,7 @@ export default function ApplicationsSection() {
               <button
                 key={job.jobId}
                 type="button"
-                onClick={() => { setSelectedJobId(job.jobId); setExpandedId(null); }}
+                onClick={() => { setSelectedJobId(job.jobId); }}
                 className={`w-full rounded-xl border p-4 text-left text-sm transition ${
                   active ? "border-indigo-300/70 bg-indigo-950/50 shadow-indigo-500/20" : "border-white/10 bg-white/5 hover:border-indigo-300/40"
                 }`}
@@ -313,12 +312,8 @@ export default function ApplicationsSection() {
 
                   <div className="divide-y divide-white/5 rounded-lg border border-white/10 bg-white/5">
                     {apps.map((app) => (
-                      <div key={app.id} className="p-3">
-                        <button
-                          type="button"
-                          className="flex w-full items-center justify-between gap-3 text-left"
-                          onClick={() => setExpandedId((prev) => (prev === app.id ? null : app.id))}
-                        >
+                      <div key={app.id} className="p-3 space-y-2">
+                        <div className="flex w-full items-center justify-between gap-3 text-left">
                           <div className="space-y-1">
                             <p className="text-sm font-semibold text-white">{app.candidate?.name || "Candidate"}</p>
                             <p className="text-xs text-slate-300">{app.candidate?.email}</p>
@@ -327,56 +322,19 @@ export default function ApplicationsSection() {
                             <p className="font-semibold text-white">{app.status || "submitted"}</p>
                             <p>{app.submittedAt ? new Date(app.submittedAt).toLocaleString() : "--"}</p>
                           </div>
-                        </button>
+                        </div>
 
-                        {expandedId === app.id && (
-                          <div className="mt-3 grid gap-3 rounded-lg border border-white/10 bg-white/5 p-3 md:grid-cols-[1.1fr,1fr,1fr]">
-                            <div className="space-y-1 text-xs text-slate-200">
-                              {app.extra?.phone && <p>Phone: {app.extra.phone}</p>}
-                              {app.extra?.location && <p>Location: {app.extra.location}</p>}
-                              {app.extra?.salaryExpectation && <p>Salary: {app.extra.salaryExpectation}</p>}
-                              {app.extra?.linkedin && (
-                                <a className="text-indigo-200 hover:text-indigo-100" href={app.extra.linkedin} target="_blank" rel="noreferrer">
-                                  LinkedIn
-                                </a>
-                              )}
-                              {app.extra?.portfolio && (
-                                <a className="text-indigo-200 hover:text-indigo-100" href={app.extra.portfolio} target="_blank" rel="noreferrer">
-                                  Portfolio
-                                </a>
-                              )}
-                              {app.additionalInfo && <p className="text-slate-200/90">Note: {app.additionalInfo}</p>}
-                              {app.confirmation ? (
-                                <p className="text-emerald-200">Candidate confirmed resume accuracy</p>
-                              ) : (
-                                <p className="text-amber-200">Not confirmed</p>
-                              )}
-                            </div>
-
-                            <div className="space-y-1 text-xs text-slate-200">
-                              <p className="font-semibold text-white">Job</p>
-                              <p>{job?.jobTitle || "Role"}</p>
-                              <p className="text-slate-300">{[job?.jobLocation, job?.jobWorkType, job?.jobSeniority].filter(Boolean).join(" • ")}</p>
-                            </div>
-
-                            <div className="space-y-2 text-xs text-slate-200">
-                              <p className="font-semibold text-white">Resume</p>
-                              {app.resume?.fileName && (
-                                <p>
-                                  {app.resume.fileName} {app.resume.size ? `• ${(app.resume.size / 1024).toFixed(1)} KB` : ""}
-                                </p>
-                              )}
-                              <a
-                                className="inline-flex text-indigo-200 hover:text-indigo-100"
-                                href={`${API_BASE}/recruiters/applications/${app.id}/resume`}
-                                target="_blank"
-                                rel="noreferrer"
-                              >
-                                View resume
-                              </a>
-                            </div>
-                          </div>
-                        )}
+                        <div className="flex flex-wrap items-center justify-between text-xs text-slate-200">
+                          <span className="text-slate-300">{[job?.jobLocation, job?.jobWorkType, job?.jobSeniority].filter(Boolean).join(" • ")}</span>
+                          <a
+                            className="inline-flex items-center gap-1 text-indigo-200 hover:text-indigo-100"
+                            href={`${API_BASE}/recruiters/applications/${app.id}/resume`}
+                            target="_blank"
+                            rel="noreferrer"
+                          >
+                            View resume
+                          </a>
+                        </div>
                       </div>
                     ))}
                   </div>
@@ -385,7 +343,7 @@ export default function ApplicationsSection() {
                     <div className="flex flex-wrap items-center gap-3 justify-between">
                       <div>
                         <p className="text-xs uppercase tracking-[0.16em] text-indigo-200">Similarity ranking</p>
-                        <p className="text-sm text-slate-200">Top candidates for this job based on resume embeddings.</p>
+                        <p className="text-sm text-slate-200">Top candidates for this job ranked by our machine learning model.</p>
                       </div>
                       <div className="flex items-center gap-2">
                         <input
@@ -479,11 +437,6 @@ export default function ApplicationsSection() {
                                 <p className="text-sm font-semibold text-white">{rec.candidateName || "Candidate"}</p>
                                 <p className="text-xs text-slate-300">{rec.candidateEmail || "No email"}</p>
                                 <p className="text-[11px] text-slate-400">Submitted {rec.submittedAt ? new Date(rec.submittedAt).toLocaleString() : "--"}</p>
-                              </div>
-                              <div className="flex items-center gap-2">
-                                <span className="rounded-full border border-indigo-300/40 bg-indigo-500/20 px-3 py-1 text-xs font-semibold text-indigo-100">
-                                  Score {rec.score.toFixed(3)}
-                                </span>
                               </div>
                             </div>
                           ))}

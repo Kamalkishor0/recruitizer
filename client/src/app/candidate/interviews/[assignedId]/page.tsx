@@ -74,12 +74,8 @@ export default function CandidateInterviewDetailPage() {
     );
   }
 
-  const templateTitle = match?.interviewTemplate?.title || "Untitled template";
-  const description = match?.interviewTemplate?.description || "No description provided";
-  const created = match?.createdAt ? new Date(match.createdAt).toLocaleString() : "";
+  const jobTitle = match?.jobTitle || "Assigned role";
   const expires = match?.expiresAt ? new Date(match.expiresAt).toLocaleString() : "";
-  const startsAt = match?.startTime ? new Date(match.startTime).toLocaleString() : "";
-  const endsAt = match?.endTime ? new Date(match.endTime).toLocaleString() : "";
   const status = match?.status ? ASSIGNMENT_STATUS_LABEL[match.status] ?? match.status : "";
   const expiresAt = match?.expiresAt ? new Date(match.expiresAt) : null;
   const isExpired = expiresAt ? expiresAt.getTime() < now : false;
@@ -92,7 +88,7 @@ export default function CandidateInterviewDetailPage() {
       <header className="mx-auto flex max-w-4xl flex-col gap-3 px-6 pb-6 pt-8 sm:flex-row sm:items-start sm:justify-between">
         <div>
           <p className="text-xs uppercase tracking-[0.2em] text-indigo-200">Interview details</p>
-          <h1 className="text-3xl font-semibold">{templateTitle}</h1>
+          <h1 className="text-3xl font-semibold">{jobTitle}</h1>
           <p className="text-sm text-slate-300">Status: {status}</p>
         </div>
         <Link
@@ -111,13 +107,12 @@ export default function CandidateInterviewDetailPage() {
         )}
 
         <section className="space-y-3 rounded-2xl border border-white/10 bg-white/5 p-6 shadow-inner shadow-indigo-500/10">
-          <p className="text-sm text-slate-200">{description}</p>
+          <p className="text-sm text-slate-200">This interview is for your assigned role. Key details are below.</p>
           <div className="flex flex-wrap gap-3 text-xs text-slate-200">
-            {created && <span className="rounded-full border border-white/10 bg-white/5 px-3 py-1">Created {created}</span>}
+            {match?.jobWorkType && <span className="rounded-full border border-white/10 bg-white/5 px-3 py-1">{match.jobWorkType}</span>}
+            {match?.jobLocation && <span className="rounded-full border border-white/10 bg-white/5 px-3 py-1">{match.jobLocation}</span>}
+            {match?.jobSeniority && <span className="rounded-full border border-white/10 bg-white/5 px-3 py-1">{match.jobSeniority}</span>}
             {expires && <span className="rounded-full border border-white/10 bg-white/5 px-3 py-1">Expires {expires}</span>}
-            {startsAt && <span className="rounded-full border border-white/10 bg-white/5 px-3 py-1">Starts {startsAt}</span>}
-            {endsAt && <span className="rounded-full border border-white/10 bg-white/5 px-3 py-1">Ends {endsAt}</span>}
-            {assignedId && <span className="rounded-full border border-white/10 bg-white/5 px-3 py-1">ID: {assignedId}</span>}
           </div>
         </section>
 
