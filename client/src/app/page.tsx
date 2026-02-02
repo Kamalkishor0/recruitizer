@@ -130,6 +130,39 @@ export default function Home() {
             </div>
           </div>
         </section>
+
+        <footer className="border-t border-white/10 bg-white/5">
+          <div className="mx-auto flex max-w-6xl flex-col gap-3 px-6 py-8 sm:flex-row sm:items-center sm:justify-between">
+            <div>
+              <p className="text-sm uppercase tracking-[0.18em] text-indigo-200">Built by</p>
+              <p className="text-lg font-semibold text-white">Kamalkishor Singh</p>
+            </div>
+            <div className="flex items-center gap-8 text-sm font-medium text-slate-200">
+              <a
+                href="https://github.com/kamalkishor0"
+                target="_blank"
+                rel="noreferrer"
+                className="underline decoration-transparent hover:decoration-white transition-colors duration-200"
+              >
+                GitHub
+              </a>
+              <a
+                href="https://www.linkedin.com/in/kamalkishor-singh/"
+                target="_blank"
+                rel="noreferrer"
+                className="underline decoration-transparent hover:decoration-white transition-colors duration-200"
+              >
+                LinkedIn
+              </a>
+              <a
+                href="mailto:kamalkishorsingh999@gmail.com"
+                className="underline decoration-transparent hover:decoration-white transition-colors duration-200"
+              >
+                Email
+              </a>
+            </div>
+          </div>
+        </footer>
       </main>
     </div>
   );

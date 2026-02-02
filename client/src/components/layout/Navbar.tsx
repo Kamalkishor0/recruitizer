@@ -18,15 +18,6 @@ export default function Navbar() {
           <Link href="/login" className="underline decoration-transparent hover:decoration-white transition-colors duration-200">Login</Link>
           <Link href="/register" className="underline decoration-transparent hover:decoration-white transition-colors duration-200">Register</Link>
           <Link href="/about" className="underline decoration-transparent hover:decoration-white transition-colors duration-200">About</Link>
-          {/* <div className="flex h-10 w-10 items-center justify-center overflow-hidden rounded-full border border-white/10 bg-white/5">
-            <Image
-              src="/images/847969.png"
-              alt="User"
-              width={32}
-              height={32}
-              className="h-8 w-8 rounded-full object-cover"
-            />
-          </div> */}
         </nav>
       </div>
     </header>
