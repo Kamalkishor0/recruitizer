@@ -1,7 +1,7 @@
 "use client";
 
 import type { ActiveTab } from "@/app/recruiter/dashboard/tabs";
-import type { OverviewStats } from "@/hooks/useRecruiterOverview";
+import type { OverviewStats } from "@/features/recruiter/hooks/useRecruiterOverview";
 
 type OverviewSectionProps = {
 	stats: OverviewStats | null;

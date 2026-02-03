@@ -1,4 +1,4 @@
-import type { RecruiterAssignment } from "@/hooks/useRecruiterAssignedTests";
+import type { RecruiterAssignment } from "@/features/recruiter/hooks/useRecruiterAssignedTests";
 
 export const formatAssignmentDate = (value?: string) => {
 	if (!value) return "—";

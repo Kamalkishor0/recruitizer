@@ -1,10 +1,10 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import CandidateSidebar, { type CandidateTab } from "@/components/candidate/CandidateSidebar";
+import CandidateSidebar, { type CandidateTab } from "@/features/candidate/components/CandidateSidebar";
 import JobsLanding from "@/components/candidate/JobsLanding";
 import ResumeUploadSection from "@/components/candidate/ResumeUploadSection";
-import { useCandidateAssignments } from "@/hooks/useCandidateAssignments";
+import { useCandidateAssignments } from "@/features/candidate/hooks/useCandidateAssignments";
 import useAuth from "@/hooks/useAuth";
 import { ASSIGNMENT_STATUS_LABEL, groupAssignmentsByStatus, type AssignmentStatus, type CandidateAssignment } from "@/lib/assignments";
 import { useRouter, useSearchParams } from "next/navigation";

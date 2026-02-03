@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { API_BASE } from "@/lib/api";
-import { useRecruiterTemplates } from "@/hooks/useRecruiterTemplates";
+import { useRecruiterTemplates } from "@/features/recruiter/hooks/useRecruiterTemplates";
 
 export type Application = {
   id: string;

@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useMemo, useState } from "react";
 import { notFound, useParams, useRouter } from "next/navigation";
-import { useCandidateAssignments } from "@/hooks/useCandidateAssignments";
+import { useCandidateAssignments } from "@/features/candidate/hooks/useCandidateAssignments";
 import useAuth from "@/hooks/useAuth";
 import { ASSIGNMENT_STATUS_LABEL } from "@/lib/assignments";
 

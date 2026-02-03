@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { getStatusTone } from "./assignmentHelpers";
-import type { RecruiterAssignment } from "@/hooks/useRecruiterAssignedTests";
+import type { RecruiterAssignment } from "@/features/recruiter/hooks/useRecruiterAssignedTests";
 
 type CompletedAssignmentsSectionProps = {
 	assignments: RecruiterAssignment[];

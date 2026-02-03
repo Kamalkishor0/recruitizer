@@ -16,9 +16,9 @@ import JobsSection from "@/components/recruiter/dashboard/JobsSection";
 import ApplicationsSection from "@/components/recruiter/dashboard/ApplicationsSection";
 import { ALLOWED_TABS, type ActiveTab } from "./tabs";
 import useAuth from "@/hooks/useAuth";
-import { useRecruiterAssignedTests } from "@/hooks/useRecruiterAssignedTests";
-import { useRecruiterOverview } from "@/hooks/useRecruiterOverview";
-import { useRecruiterTemplates } from "@/hooks/useRecruiterTemplates";
+import { useRecruiterAssignedTests } from "@/features/recruiter/hooks/useRecruiterAssignedTests";
+import { useRecruiterOverview } from "@/features/recruiter/hooks/useRecruiterOverview";
+import { useRecruiterTemplates } from "@/features/recruiter/hooks/useRecruiterTemplates";
 
 // Recruiter dashboard
 export default function RecruiterDashboard() {

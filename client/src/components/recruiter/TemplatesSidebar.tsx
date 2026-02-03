@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
-import type { RecruiterTemplate } from "@/hooks/useRecruiterTemplates";
+import type { RecruiterTemplate } from "@/features/recruiter/hooks/useRecruiterTemplates";
 import GeminiGenerator from "./GeminiGenerator";
 
 const formatDate = (value?: string) => {

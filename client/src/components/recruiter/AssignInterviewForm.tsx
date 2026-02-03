@@ -1,7 +1,7 @@
 "use client";
 
 import { FormEvent, useEffect, useMemo, useState } from "react";
-import type { RecruiterTemplate } from "@/hooks/useRecruiterTemplates";
+import type { RecruiterTemplate } from "@/features/recruiter/hooks/useRecruiterTemplates";
 import { API_BASE } from "@/lib/api";
 
 export type AssignInterviewFormProps = {

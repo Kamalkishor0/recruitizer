@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useState } from "react";
-import type { RecruiterAssignment } from "@/hooks/useRecruiterAssignedTests";
+import type { RecruiterAssignment } from "@/features/recruiter/hooks/useRecruiterAssignedTests";
 import { API_BASE } from "@/lib/api";
 
 type TopCandidate = {

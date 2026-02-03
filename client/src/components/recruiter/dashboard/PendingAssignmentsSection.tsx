@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import { formatAssignmentDate, getStatusTone } from "./assignmentHelpers";
-import type { RecruiterAssignment } from "@/hooks/useRecruiterAssignedTests";
+import type { RecruiterAssignment } from "@/features/recruiter/hooks/useRecruiterAssignedTests";
 
 type PendingAssignmentsSectionProps = {
 	assignments: RecruiterAssignment[];
