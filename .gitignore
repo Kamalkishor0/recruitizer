@@ -1,7 +1,9 @@
 node_modules
 node_modules
-server/.env
-client/.env
+server/.env*
+client/.env*
+ml-services/.env*
+.env*
 
 # Local virtualenvs
 .venv
