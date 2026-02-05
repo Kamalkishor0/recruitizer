@@ -108,7 +108,7 @@ export async function signup(req, res) {
 
     return res
       .status(201)
-      .json({ message: "Account created. Check your email to verify before signing in." });
+      .json({ message: "Account created. Check your email(in spam probabily) to verify before signing in." });
   } catch (err) {
     const message = err instanceof Error ? err.message : "Could not create account.";
     return res.status(400).json({ error: message });
