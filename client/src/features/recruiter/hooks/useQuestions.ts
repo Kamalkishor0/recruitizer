@@ -65,8 +65,13 @@ export function useQuestions(enabled: boolean, testType: "multiple_choice" = "mu
     setLoading(true);
     setError(null);
     try {
+      const token = typeof window !== "undefined" ? localStorage.getItem("token") : null;
+      const headers: Record<string, string> = {};
+      if (token) headers.Authorization = `Bearer ${token}`;
+
       const res = await fetch(`${API_BASE}/questions/multiple-choice`, {
         credentials: "include",
+        headers,
       });
       if (!res.ok) {
         const body = await res.json().catch(() => ({}));

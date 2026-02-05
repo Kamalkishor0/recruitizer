@@ -14,8 +14,13 @@ export function useCandidateAssignments(enabled: boolean) {
     setLoading(true);
     setError(null);
     try {
+      const token = typeof window !== "undefined" ? localStorage.getItem("token") : null;
+      const headers: Record<string, string> = {};
+      if (token) headers.Authorization = `Bearer ${token}`;
+
       const res = await fetch(`${API_BASE}/candidates/assigned-test`, {
         credentials: "include",
+        headers,
       });
       if (!res.ok) {
         const body = await res.json().catch(() => ({}));
