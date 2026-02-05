@@ -55,7 +55,11 @@ export default function ApplicationsSection() {
       setLoading(true);
       setError(null);
       try {
-        const res = await fetch(`${API_BASE}/recruiters/applications`, { credentials: "include" });
+        const token = typeof window !== "undefined" ? localStorage.getItem("token") : null;
+        const headers: Record<string, string> = {};
+        if (token) headers.Authorization = `Bearer ${token}`;
+
+        const res = await fetch(`${API_BASE}/recruiters/applications`, { credentials: "include", headers });
         if (!res.ok) {
           const detail = await res.json().catch(() => ({}));
           throw new Error(detail?.error || "Failed to load applications");
