@@ -81,7 +81,9 @@ export default function GeminiGenerator({ onTemplateCreated }: GeminiGeneratorPr
 
 			if (!res.ok) {
 				const body = await res.json().catch(() => ({}));
-				throw new Error(body.error || body.detail || "Failed to generate questions");
+				const errorMsg = body.error || "Failed to generate questions";
+				const detail = body.detail ? ` Details: ${typeof body.detail === 'string' ? body.detail : JSON.stringify(body.detail)}` : '';
+				throw new Error(`${errorMsg}${detail}`);
 			}
 
 			const data = (await res.json()) as GenerateResponse;
