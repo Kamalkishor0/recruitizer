@@ -82,8 +82,12 @@ export default function TopCandidatesSidebar({ assignments, onReload, defaultK =
 		setLoading(true);
 		setError(null);
 		try {
+			const token = typeof window !== "undefined" ? localStorage.getItem("token") : null;
+			const headers: Record<string, string> = {};
+			if (token) headers.Authorization = `Bearer ${token}`;
+
 			const url = `${API_BASE}/recruiters/top-candidates?templateId=${encodeURIComponent(templateId)}&limit=${limit}`;
-			const res = await fetch(url, { credentials: "include" });
+			const res = await fetch(url, { credentials: "include", headers });
 			if (!res.ok) {
 				const body = await res.json().catch(() => ({}));
 				throw new Error(body.error || "Failed to load top candidates");
@@ -107,9 +111,13 @@ export default function TopCandidatesSidebar({ assignments, onReload, defaultK =
 		setError(null);
 		setActionMessage(null);
 		try {
+			const token = typeof window !== "undefined" ? localStorage.getItem("token") : null;
+			const headers: Record<string, string> = { "Content-Type": "application/json" };
+			if (token) headers.Authorization = `Bearer ${token}`;
+
 			const res = await fetch(`${API_BASE}/recruiters/top-candidates/mark-passed`, {
 				method: "POST",
-				headers: { "Content-Type": "application/json" },
+				headers,
 				credentials: "include",
 				body: JSON.stringify({ templateId: selectedTemplateId, limit: k }),
 			});

@@ -55,9 +55,13 @@ export default function ApplyToJobPage() {
       }
 
       try {
+        const token = typeof window !== "undefined" ? localStorage.getItem("token") : null;
+        const headers: Record<string, string> = {};
+        if (token) headers.Authorization = `Bearer ${token}`;
+
         const [jobRes, resumeRes] = await Promise.all([
-          fetch(`${API_BASE}/candidates/jobs/${jobId}`, { credentials: "include" }),
-          fetch(`${API_BASE}/candidates/resume`, { credentials: "include" }),
+          fetch(`${API_BASE}/candidates/jobs/${jobId}`, { credentials: "include", headers }),
+          fetch(`${API_BASE}/candidates/resume`, { credentials: "include", headers }),
         ]);
 
         if (jobRes.status === 404) {
@@ -100,10 +104,14 @@ export default function ApplyToJobPage() {
     setSuccess(null);
 
     try {
+      const token = typeof window !== "undefined" ? localStorage.getItem("token") : null;
+      const headers: Record<string, string> = { "Content-Type": "application/json" };
+      if (token) headers.Authorization = `Bearer ${token}`;
+
       const res = await fetch(`${API_BASE}/candidates/jobs/${jobId}/apply`, {
         method: "POST",
         credentials: "include",
-        headers: { "Content-Type": "application/json" },
+        headers,
         body: JSON.stringify({
           confirmation: form.confirmation,
           additionalInfo: form.additionalInfo,

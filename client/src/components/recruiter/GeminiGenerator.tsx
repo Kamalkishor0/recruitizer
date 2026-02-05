@@ -61,9 +61,13 @@ export default function GeminiGenerator({ onTemplateCreated }: GeminiGeneratorPr
 		setPreview(null);
 
 		try {
+			const token = typeof window !== "undefined" ? localStorage.getItem("token") : null;
+			const headers: Record<string, string> = { "Content-Type": "application/json" };
+			if (token) headers.Authorization = `Bearer ${token}`;
+
 			const res = await fetch(`${API_BASE}/ai/generate-template`, {
 				method: "POST",
-				headers: { "Content-Type": "application/json" },
+				headers,
 				credentials: "include",
 				body: JSON.stringify({
 					apiKey,
@@ -104,9 +108,13 @@ export default function GeminiGenerator({ onTemplateCreated }: GeminiGeneratorPr
 		setError(null);
 		setSuccess(null);
 		try {
+			const token = typeof window !== "undefined" ? localStorage.getItem("token") : null;
+			const headers: Record<string, string> = { "Content-Type": "application/json" };
+			if (token) headers.Authorization = `Bearer ${token}`;
+
 			const res = await fetch(`${API_BASE}/ai/save-template`, {
 				method: "POST",
-				headers: { "Content-Type": "application/json" },
+				headers,
 				credentials: "include",
 				body: JSON.stringify({
 					title: safeTitle,

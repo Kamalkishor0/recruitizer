@@ -87,9 +87,14 @@ export default function StartInterviewPage() {
     setSubmitting(true);
     setStartError(null);
     try {
+      const token = typeof window !== "undefined" ? localStorage.getItem("token") : null;
+      const headers: Record<string, string> = {};
+      if (token) headers.Authorization = `Bearer ${token}`;
+
       const res = await fetch(`${API_BASE}/candidates/start-test/${user._id}/${assignedId}`, {
         method: "POST",
         credentials: "include",
+        headers,
       });
       const body = (await res.json().catch(() => ({}))) as StartResponse;
       if (!res.ok) {

@@ -47,7 +47,11 @@ export default function JobsSection() {
 	const loadJobs = async () => {
 		setLoadingJobs(true);
 		try {
-			const res = await fetch(`${API_BASE}/recruiters/jobs`, { credentials: "include" });
+			const token = typeof window !== "undefined" ? localStorage.getItem("token") : null;
+			const headers: Record<string, string> = {};
+			if (token) headers.Authorization = `Bearer ${token}`;
+
+			const res = await fetch(`${API_BASE}/recruiters/jobs`, { credentials: "include", headers });
 			if (!res.ok) {
 				throw new Error("Failed to fetch jobs");
 			}
@@ -94,9 +98,13 @@ export default function JobsSection() {
 				seniority: form.seniority?.trim() ?? "",
 			};
 
+			const token = typeof window !== "undefined" ? localStorage.getItem("token") : null;
+			const headers: Record<string, string> = { "Content-Type": "application/json" };
+			if (token) headers.Authorization = `Bearer ${token}`;
+
 			const res = await fetch(`${API_BASE}/recruiters/jobs`, {
 				method: "POST",
-				headers: { "Content-Type": "application/json" },
+				headers,
 				credentials: "include",
 				body: JSON.stringify(payload),
 			});

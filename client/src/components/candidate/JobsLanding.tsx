@@ -26,7 +26,11 @@ export default function JobsLanding() {
 
   const fetchFallbackJobs = useCallback(async () => {
     try {
-      const res = await fetch(`${API_BASE}/candidates/jobs`, { credentials: "include" });
+      const token = typeof window !== "undefined" ? localStorage.getItem("token") : null;
+      const headers: Record<string, string> = {};
+      if (token) headers.Authorization = `Bearer ${token}`;
+
+      const res = await fetch(`${API_BASE}/candidates/jobs`, { credentials: "include", headers });
       if (!res.ok) {
         throw new Error("Failed to load jobs");
       }
@@ -43,7 +47,11 @@ export default function JobsLanding() {
       setLoading(true);
       setError(null);
       try {
-        const res = await fetch(`${API_BASE}/candidates/recommendations`, { credentials: "include" });
+        const token = typeof window !== "undefined" ? localStorage.getItem("token") : null;
+        const headers: Record<string, string> = {};
+        if (token) headers.Authorization = `Bearer ${token}`;
+
+        const res = await fetch(`${API_BASE}/candidates/recommendations`, { credentials: "include", headers });
 
         if (res.status === 404) {
           setError("Upload a resume to see personalized job recommendations.");

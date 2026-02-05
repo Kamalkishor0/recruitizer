@@ -15,7 +15,11 @@ export default function ResumeUploadSection() {
     setLoading(true);
     setError(null);
     try {
-      const res = await fetch(`${API_BASE}/candidates/resume`, { credentials: "include" });
+      const token = typeof window !== "undefined" ? localStorage.getItem("token") : null;
+      const headers: Record<string, string> = {};
+      if (token) headers.Authorization = `Bearer ${token}`;
+
+      const res = await fetch(`${API_BASE}/candidates/resume`, { credentials: "include", headers });
       if (res.status === 404) {
         setResume(null);
         return;
@@ -53,12 +57,17 @@ export default function ResumeUploadSection() {
 
     setUploading(true);
     try {
+      const token = typeof window !== "undefined" ? localStorage.getItem("token") : null;
       const formData = new FormData();
       formData.append("file", file);
+      const headers: Record<string, string> = {};
+      if (token) headers.Authorization = `Bearer ${token}`;
+
       const res = await fetch(`${API_BASE}/candidates/resume`, {
         method: "POST",
         body: formData,
         credentials: "include",
+        headers,
       });
 
       if (!res.ok) {

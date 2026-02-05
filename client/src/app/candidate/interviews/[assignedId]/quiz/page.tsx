@@ -141,11 +141,15 @@ export default function QuizWorkspacePage() {
 
     if (payloads.length === 0) return;
 
+    const token = typeof window !== "undefined" ? localStorage.getItem("token") : null;
+    const headers: Record<string, string> = { "Content-Type": "application/json" };
+    if (token) headers.Authorization = `Bearer ${token}`;
+
     await Promise.all(
       payloads.map(async ({ questionId, answer }) => {
         const res = await fetch(`${API_BASE}/submit/${assignedId}/${questionId}`, {
           method: "POST",
-          headers: { "Content-Type": "application/json" },
+          headers,
           credentials: "include",
           body: JSON.stringify({ answer }),
         });
@@ -163,9 +167,14 @@ export default function QuizWorkspacePage() {
     setSubmitError(null);
     try {
       await submitResponses();
+      const token = typeof window !== "undefined" ? localStorage.getItem("token") : null;
+      const headers: Record<string, string> = {};
+      if (token) headers.Authorization = `Bearer ${token}`;
+
       const res = await fetch(`${API_BASE}/candidates/finish-test/${user._id}/${assignedId}`, {
         method: "POST",
         credentials: "include",
+        headers,
       });
       const body = await res.json().catch(() => ({}));
       if (!res.ok) {

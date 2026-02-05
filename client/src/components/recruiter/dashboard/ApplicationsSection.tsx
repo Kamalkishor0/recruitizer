@@ -111,7 +111,11 @@ export default function ApplicationsSection() {
     setRecLoading((prev) => ({ ...prev, [jobId]: true }));
     setRecError((prev) => ({ ...prev, [jobId]: null }));
     try {
-      const res = await fetch(`${API_BASE}/recruiters/jobs/${jobId}/recommendations?topK=${topK}`, { credentials: "include" });
+      const token = typeof window !== "undefined" ? localStorage.getItem("token") : null;
+      const headers: Record<string, string> = {};
+      if (token) headers.Authorization = `Bearer ${token}`;
+
+      const res = await fetch(`${API_BASE}/recruiters/jobs/${jobId}/recommendations?topK=${topK}`, { credentials: "include", headers });
       if (!res.ok) {
         const detail = await res.json().catch(() => ({}));
         throw new Error(detail?.error || "Failed to load recommendations");
