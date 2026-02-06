@@ -5,6 +5,29 @@ import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import { API_BASE } from "@/lib/api";
 
+function openResumeFile() {
+  const token = typeof window !== "undefined" ? localStorage.getItem("token") : null;
+  const headers: Record<string, string> = {};
+  if (token) headers.Authorization = `Bearer ${token}`;
+
+  fetch(`${API_BASE}/candidates/resume/file`, {
+    credentials: "include",
+    headers,
+  })
+    .then((res) => {
+      if (!res.ok) throw new Error("Failed to fetch resume");
+      return res.blob();
+    })
+    .then((blob) => {
+      const url = URL.createObjectURL(blob);
+      window.open(url, "_blank");
+    })
+    .catch((err) => {
+      console.error("Failed to open resume:", err);
+      alert("Failed to open resume. Please try again.");
+    });
+}
+
 interface JobDetail {
   _id: string;
   title: string;
@@ -176,14 +199,13 @@ export default function ApplyToJobPage() {
             <p className="font-semibold">{resume.fileName}</p>
             <p className="text-slate-300">{resume.mimeType} • {(resume.size / 1024).toFixed(1)} KB</p>
             {resume.uploadedAt && <p className="text-xs text-slate-400">Uploaded {new Date(resume.uploadedAt).toLocaleString()}</p>}
-            <a
-              href={`${API_BASE}/candidates/resume/file`}
-              target="_blank"
-              rel="noopener noreferrer"
+            <button
+              type="button"
+              onClick={openResumeFile}
               className="mt-2 inline-flex items-center text-emerald-200 hover:text-emerald-100"
             >
               View resume
-            </a>
+            </button>
           </div>
         ) : (
           <p className="mt-2 text-sm text-rose-200">No resume found. Please upload your resume before applying.</p>

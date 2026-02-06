@@ -115,7 +115,14 @@ export async function getResume(req, res) {
 
 export async function getResumeFile(req, res) {
   try {
-    const userId = req.user?._id;
+    // Support userId from authenticated user OR from query param (for recruiter viewing candidate resume)
+    let userId = req.user?._id;
+    
+    // If candidateId query param is provided and user is recruiter/admin, use that instead
+    if (req.query.candidateId && req.user?.role && ["recruiter", "admin"].includes(req.user.role)) {
+      userId = req.query.candidateId;
+    }
+    
     if (!userId) {
       return res.status(401).json({ error: "Unauthorized" });
     }

@@ -3,6 +3,29 @@
 import { type FormEvent, useCallback, useEffect, useState } from "react";
 import { API_BASE } from "@/lib/api";
 
+function openResumeFile() {
+  const token = typeof window !== "undefined" ? localStorage.getItem("token") : null;
+  const headers: Record<string, string> = {};
+  if (token) headers.Authorization = `Bearer ${token}`;
+
+  fetch(`${API_BASE}/candidates/resume/file`, {
+    credentials: "include",
+    headers,
+  })
+    .then((res) => {
+      if (!res.ok) throw new Error("Failed to fetch resume");
+      return res.blob();
+    })
+    .then((blob) => {
+      const url = URL.createObjectURL(blob);
+      window.open(url, "_blank");
+    })
+    .catch((err) => {
+      console.error("Failed to open resume:", err);
+      alert("Failed to open resume. Please try again.");
+    });
+}
+
 export default function ResumeUploadSection() {
   const [file, setFile] = useState<File | null>(null);
   const [resume, setResume] = useState<null | { fileName: string; uploadedAt?: string; size?: number }>(null);
@@ -130,17 +153,16 @@ export default function ResumeUploadSection() {
           <p className="mt-2 text-base font-semibold text-white">{resume.fileName}</p>
           <p className="text-xs text-slate-300">Uploaded {resume.uploadedAt ? new Date(resume.uploadedAt).toLocaleString() : "recently"}</p>
           {resume.size && <p className="text-xs text-slate-400">Size: {Math.round(resume.size / 1024)} KB</p>}
-          <a
-            href={`${API_BASE}/candidates/resume/file`}
-            target="_blank"
-            rel="noopener noreferrer"
+          <button
+            type="button"
+            onClick={openResumeFile}
             className="mt-3 inline-flex items-center gap-2 text-xs font-semibold text-emerald-200 hover:text-emerald-100"
           >
             View resume
             <svg aria-hidden viewBox="0 0 24 24" className="h-4 w-4">
               <path d="M5 12h14m-6-6 6 6-6 6" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} />
             </svg>
-          </a>
+          </button>
         </div>
       )}
     </section>
