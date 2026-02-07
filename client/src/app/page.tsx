@@ -41,7 +41,7 @@ export default function Home() {
               </Link>
             </div>
 
-            <div className="grid gap-4 sm:grid-cols-3">
+            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
               <div className="rounded-2xl border border-white/10 bg-white/5 p-4 shadow-sm">
                 <p className="text-2xl font-semibold text-white">Faster</p>
                 <p className="text-sm text-slate-300">Fast and efficient interview process</p>
@@ -53,6 +53,10 @@ export default function Home() {
               <div className="rounded-2xl border border-white/10 bg-white/5 p-4 shadow-sm">
                 <p className="text-2xl font-semibold text-white">Two modes</p>
                 <p className="text-sm text-slate-300">Recruiter and candidate dashboards</p>
+              </div>
+              <div className="rounded-2xl border border-white/10 bg-gradient-to-br from-indigo-500/20 to-purple-500/20 p-4 shadow-sm">
+                <p className="text-2xl font-semibold text-white">Jobs Board</p>
+                <p className="text-sm text-slate-300">AI-powered job matching & recommendations</p>
               </div>
             </div>
           </div>
@@ -81,9 +85,11 @@ export default function Home() {
               </div>
               <ul className="space-y-3 text-sm text-slate-200">
                 <li className="flex items-start gap-2"><span className="mt-1 h-2 w-2 rounded-full bg-indigo-400" />Launch AI-powered role-specific templates in minutes.</li>
-                <li className="flex items-start gap-2"><span className="mt-1 h-2 w-2 rounded-full bg-indigo-400" />Track submissions, scores, and rubric notes in one dashboard.</li>
+                <li className="flex items-start gap-2"><span className="mt-1 h-2 w-2 rounded-full bg-indigo-400" />Track interviews, submissions, and scores in one dashboard.</li>
                 <li className="flex items-start gap-2"><span className="mt-1 h-2 w-2 rounded-full bg-indigo-400" />Select candidates with single click.</li>
                 <li className="flex items-start gap-2"><span className="mt-1 h-2 w-2 rounded-full bg-indigo-400" />Fast recruitment workflows.</li>
+                <li className="flex items-start gap-2"><span className="mt-1 h-2 w-2 rounded-full bg-indigo-400" />Post jobs with skills, seniority, location & work type details.</li>
+                <li className="flex items-start gap-2"><span className="mt-1 h-2 w-2 rounded-full bg-indigo-400" />Reach candidates through AI-matched job recommendations.</li>
               </ul>
             </div>
 
@@ -97,6 +103,8 @@ export default function Home() {
                 <li className="flex items-start gap-2"><span className="mt-1 h-2 w-2 rounded-full bg-indigo-400" />Give tests in a distraction-free environment with a built-in code editor(coming soon) and timer.</li>
                 <li className="flex items-start gap-2"><span className="mt-1 h-2 w-2 rounded-full bg-indigo-400" />Submit your answers before the deadline.</li>
                 <li className="flex items-start gap-2"><span className="mt-1 h-2 w-2 rounded-full bg-indigo-400" />Receive updates of your interview status by recruiter on your dashboard.</li>
+                <li className="flex items-start gap-2"><span className="mt-1 h-2 w-2 rounded-full bg-indigo-400" />Browse and apply to jobs tailored to your skills and experience.</li>
+                <li className="flex items-start gap-2"><span className="mt-1 h-2 w-2 rounded-full bg-indigo-400" />Get AI-powered job recommendations based on your resume.</li>
               </ul>
             </div>
           </div>
