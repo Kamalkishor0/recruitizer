@@ -29,7 +29,7 @@ A comprehensive AI-powered interview platform that connects recruiters with cand
 The platform consists of three main services:
 
 ```
-AI_Interview/
+recruitizer/
 ├── client/          # Next.js frontend application
 ├── server/          # Node.js/Express backend API
 └── ml-services/     # Python FastAPI ML microservice
@@ -74,8 +74,8 @@ Before you begin, ensure you have the following installed:
 ### 1. Clone the Repository
 
 ```bash
-git clone <repository-url>
-cd AI_Interview
+git clone https://github.com/Kamalkishor0/recruitizer.git
+cd recruitizer
 ```
 
 ### 2. Environment Setup
@@ -86,7 +86,7 @@ Create `.env` files for each service:
 
 ```env
 PORT=5000
-MONGODB_URI=mongodb://localhost:27017/ai_interview
+MONGODB_URI=mongodb://localhost:27017/recruitizer
 JWT_SECRET=your_jwt_secret_key
 AUTH0_DOMAIN=your_auth0_domain
 AUTH0_CLIENT_ID=your_auth0_client_id
@@ -169,8 +169,8 @@ Server will run on `http://localhost:5000`
 cd ml-services
 uvicorn app.main:app --reload --port 8000
 # OR using Docker
-docker build -t ai-interview-ml .
-docker run -p 8000:8000 ai-interview-ml
+docker build -t recruitizer-ml .
+docker run -p 8000:8000 recruitizer-ml
 ```
 
 ML API will run on `http://localhost:8000`
@@ -258,8 +258,8 @@ ml-services/app/
 
 ```bash
 cd ml-services
-docker build -t ai-interview-ml .
-docker run -p 8000:8000 ai-interview-ml
+docker build -t recruitizer-ml .
+docker run -p 8000:8000 recruitizer-ml
 ```
 
 ## 🔐 Authentication
