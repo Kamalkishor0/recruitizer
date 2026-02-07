@@ -14,7 +14,7 @@ export default function Navbar() {
           </div>
         </div>
         <nav className="flex items-center gap-8 text-sm font-medium text-slate-200">
-          {/* <Link href="/" className="transition hover:text-white">Home</Link> */}
+          <Link href="/" className="underline decoration-transparent hover:decoration-white transition-colors duration-200">Home</Link>
           <Link href="/login" className="underline decoration-transparent hover:decoration-white transition-colors duration-200">Login</Link>
           <Link href="/register" className="underline decoration-transparent hover:decoration-white transition-colors duration-200">Register</Link>
           <Link href="/about" className="underline decoration-transparent hover:decoration-white transition-colors duration-200">About</Link>
