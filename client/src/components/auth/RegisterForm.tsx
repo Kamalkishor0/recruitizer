@@ -76,7 +76,7 @@ export default function RegisterForm() {
 		<div className="w-full max-w-xl rounded-2xl border border-white/10 bg-white/5 p-8 shadow-2xl backdrop-blur">
 			<h2 className="text-3xl font-semibold text-white">Create your account</h2>
 			<p className="mt-2 text-sm text-slate-300">Tell us who you are to tailor your interview flow.</p>
-
+			<p className="mt-2 text-sm text-slate-300">(It might take a minute, free plan issue while processing)</p>
 			<form onSubmit={handleSubmit} className="mt-8 space-y-5">
 				<div className="space-y-2">
 					<label htmlFor="fullName" className="block text-sm font-medium text-slate-200">Full name</label>
